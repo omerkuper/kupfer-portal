@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="{{ lang }}" dir="{{ dir }}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{ t('log_title', name=server.name) }}</title>
+<link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700&family=IBM+Plex+Mono:wght@400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/portal.css?v={{ v }}">
+<script src="https://unpkg.com/htmx.org@2.0.4/dist/htmx.min.js" defer></script>
+</head>
+<body class="logpage">
+<header class="loghead">
+  <h1>{{ t('log_title', name=server.name) }}</h1>
+  <span class="muted">{{ t('log_live') }}</span>
+</header>
+{% include "partials/log_body.html" %}
+</body>
+</html>

@@ -1,0 +1,3 @@
+<div id="logbody" hx-get="/servers/{{ server.id }}/log" hx-trigger="every 3s" hx-swap="outerHTML">
+{% if text %}<pre class="logtext" dir="ltr">{{ text }}</pre>{% else %}<p class="placeholder">{{ t('log_empty') }}</p>{% endif %}
+</div>

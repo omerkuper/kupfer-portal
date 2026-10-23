@@ -1,0 +1,34 @@
+{% from "_icons.html" import icon %}
+<div id="status-grid" class="status-grid" hx-get="/partials/status" hx-trigger="every 5s" hx-swap="outerHTML">
+  {% for sid, s in cfg.servers.items() %}
+  {% set state = st[sid].state %}
+  <div class="srv" data-state="{{ state }}">
+    <div class="srv-top">
+      <i class="dot" data-state="{{ state }}"></i>
+      <div class="srv-name">
+        <strong dir="ltr">{{ s.name }}</strong>
+        <span class="mono muted" dir="ltr">:{{ s.port }}{% if uptime[sid] and state == RUNNING %} · {{ uptime[sid] }}{% endif %}</span>
+      </div>
+    </div>
+    <div class="srv-state">
+      {% if state == EXTERNAL %}<span title="{{ t('external_note') }}">{{ t('external') }}</span>
+      {% elif state == CRASHED %}<span class="bad">{{ t('crashed') }} · {{ st[sid].exit_code }}</span>
+      {% else %}{{ t(state) }}{% endif %}
+    </div>
+    {% if st[sid].error %}<div class="srv-err" dir="ltr">{{ st[sid].error }}</div>{% endif %}
+    <div class="srv-actions">
+      {% if state in ('stopped', CRASHED) %}
+        <button type="button" class="btn btn-sm btn-primary" hx-post="/servers/{{ sid }}/start" hx-target="#status-grid" hx-swap="outerHTML">{{ icon('play', 11) }}{{ t('start') }}</button>
+      {% elif state in (RUNNING, STARTING) %}
+        <button type="button" class="btn btn-sm btn-ghost" hx-post="/servers/{{ sid }}/stop" hx-target="#status-grid" hx-swap="outerHTML">{{ icon('stop', 10) }}{{ t('stop') }}</button>
+        {% if state == RUNNING %}<button type="button" class="btn btn-sm btn-ghost" hx-post="/servers/{{ sid }}/restart" hx-target="#status-grid" hx-swap="outerHTML" aria-label="{{ t('restart') }}" title="{{ t('restart') }}">{{ icon('restart', 14) }}</button>{% endif %}
+      {% endif %}
+      {% if logs[sid] %}<a class="btn btn-sm btn-ghost" href="/servers/{{ sid }}/log" target="_blank" rel="noopener" aria-label="{{ t('log') }} {{ s.name }}" title="{{ t('log') }}">{{ icon('log', 14) }}</a>{% endif %}
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% if request.headers.get('HX-Request') %}
+  {% for v in cfg.views.values() %}{% if v.server %}<i class="dot" id="dot-{{ v.id }}" data-state="{{ st[v.server].state }}" hx-swap-oob="true"></i>{% endif %}{% endfor %}
+  <span id="summary" class="summary" hx-swap-oob="true"><i class="dot" data-state="{{ 'running' if up == total else 'starting' if up else 'stopped' }}"></i>{{ t('running_count', n=up, m=total) }}</span>
+{% endif %}

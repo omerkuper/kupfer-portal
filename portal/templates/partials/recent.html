@@ -1,0 +1,13 @@
+{% if items %}
+<ul class="recent">
+  {% for i in items %}{% set v = cfg.views[i.view] %}
+  <li><button type="button" class="recent-row" data-open="{{ v.id }}" data-label="{{ v.text(lang) }}" data-path="{{ i.path }}">
+    <span class="tag tag-{{ v.icon }}" dir="ltr">{{ v.label_en|upper }}</span>
+    <span class="recent-path mono" dir="ltr">{{ i.path }}</span>
+    <span class="muted recent-at" dir="ltr">{{ i.when }}</span>
+  </button></li>
+  {% endfor %}
+</ul>
+{% else %}
+<p class="placeholder">{{ t('recent_empty') }}</p>
+{% endif %}

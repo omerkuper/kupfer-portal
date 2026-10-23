@@ -1,0 +1,48 @@
+{% from "_icons.html" import icon %}
+{% if state == 'frame' %}
+<div class="tabview tabview-frame">
+  <div class="framebar">
+    <span class="mono muted" dir="ltr">{{ server.name }} · {{ path }}</span>
+    <span class="row-gap">
+      <button type="button" class="btn btn-xs btn-ghost" data-reload aria-label="Reload" title="Reload">{{ icon('restart', 14) }}</button>
+      <a class="btn btn-xs btn-ghost" href="{{ src }}" target="_blank" rel="noopener" title="{{ t('new_window') }}" aria-label="{{ t('new_window') }}">{{ icon('external', 14) }}</a>
+    </span>
+  </div>
+  <iframe src="{{ src }}" title="{{ view.text(lang) }}"></iframe>
+</div>
+{% elif state == 'link' %}
+<div class="tabview tabview-msg">
+  <div class="msg">
+    <span class="msg-ic">{{ icon(view.icon, 26) }}</span>
+    <h2>{{ view.text(lang) }}</h2>
+    <p>{{ t('calc_missing') }}</p>
+  </div>
+</div>
+{% else %}
+<div class="tabview tabview-msg"
+  {% if state == STARTING %}hx-get="/partials/tab/{{ view.id }}?path={{ path|urlencode }}" hx-trigger="every 1500ms" hx-swap="outerHTML"{% endif %}>
+  <div class="msg" data-state="{{ state }}">
+    <span class="msg-ic">{{ icon(view.icon, 26) }}</span>
+    {% if state == STARTING %}
+      <h2>{{ t('starting_title', name=server.name) }}</h2>
+      <p>{{ t('starting_text') }}</p>
+      <div class="spinner" aria-hidden="true"></div>
+    {% elif state == CRASHED %}
+      <h2>{{ t('crashed_title', name=server.name) }}</h2>
+      <p>{{ t('crashed_text', code=status.exit_code) }}</p>
+    {% elif status.error %}
+      <h2>{{ t('error_title', name=server.name) }}</h2>
+      <p class="mono" dir="ltr">{{ status.error }}</p>
+    {% else %}
+      <h2>{{ t('off_title', name=server.name) }}</h2>
+      <p>{{ t('off_text') }}</p>
+    {% endif %}
+    <div class="row-gap center">
+      {% if state != STARTING %}
+      <button type="button" class="btn btn-primary" hx-post="/servers/{{ server.id }}/start?view={{ view.id }}&path={{ path|urlencode }}" hx-target="closest .tabview" hx-swap="outerHTML">{{ icon('play', 13) }}{{ t('start') }} {{ server.name }}</button>
+      {% endif %}
+      {% if has_log %}<a class="btn btn-ghost" href="/servers/{{ server.id }}/log" target="_blank" rel="noopener">{{ icon('log', 14) }}{{ t('open_log') }}</a>{% endif %}
+    </div>
+  </div>
+</div>
+{% endif %}

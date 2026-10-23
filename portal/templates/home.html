@@ -1,0 +1,128 @@
+{% from "_icons.html" import icon, bird, spectrum %}<!doctype html>
+<html lang="{{ lang }}" dir="{{ dir }}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kupfer · {{ t('home') }}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@700&family=Assistant:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/portal.css?v={{ v }}">
+<script src="https://unpkg.com/htmx.org@2.0.4/dist/htmx.min.js" defer></script>
+<script src="/static/portal.js?v={{ v }}" defer></script>
+</head>
+<body>
+<div class="shell">
+
+<nav class="rail" aria-label="{{ t('systems') }}">
+  <button type="button" class="rail-brand" data-open="home" aria-label="Kupfer · {{ t('home') }}">{{ bird(36) }}</button>
+  <div class="rail-nav">
+    <button type="button" class="rail-item" data-open="home" data-rail="home">{{ icon('home') }}<span>{{ t('home') }}</span></button>
+    {% for v in cfg.views.values() %}
+      {% if v.external and v.url %}
+      <a class="rail-item" href="{{ v.url }}" target="_blank" rel="noopener" title="{{ t('external_link') }}">{{ icon(v.icon) }}<span>{{ v.text(lang) }}</span><i class="rail-ext">{{ icon('external', 11) }}</i></a>
+      {% else %}
+      <button type="button" class="rail-item" data-open="{{ v.id }}" data-label="{{ v.text(lang) }}" data-rail="{{ v.id }}">
+        {% if v.server %}<i class="dot" id="dot-{{ v.id }}" data-state="{{ st[v.server].state }}"></i>{% endif %}
+        {{ icon(v.icon) }}<span {% if v.label == v.label_en %}dir="ltr"{% endif %}>{{ v.text(lang) }}</span>
+      </button>
+      {% endif %}
+    {% endfor %}
+  </div>
+</nav>
+
+<div class="main">
+  <div class="tabbar">
+    <div class="tabs" role="tablist" aria-label="{{ t('tabs') }}" id="tabs">
+      <div class="tab on" data-tab="home"><button type="button" role="tab" aria-selected="true" data-tab-select="home">{{ t('home') }}</button></div>
+    </div>
+    <div class="tabbar-end">
+      <span id="summary" class="summary"><i class="dot" data-state="{{ 'running' if up == total else 'starting' if up else 'stopped' }}"></i>{{ t('running_count', n=up, m=total) }}</span>
+      <a class="btn-lang" href="/lang?to={{ 'he' if lang == 'en' else 'en' }}" aria-label="{{ t('lang_switch_label') }}">{{ t('lang_switch') }}</a>
+    </div>
+  </div>
+
+  <div id="panes" class="panes">
+    <section class="pane pane-home" data-pane="home">
+      <div class="home">
+
+        <section class="hero">
+          <div class="hero-title">
+            <span class="wordmark">Kupfer</span>
+            <span class="greet">{{ t('greet', name=cfg.owner) if cfg.owner else t('greet_anon') }}</span>
+          </div>
+          <div class="search">
+            {{ icon('search', 22) }}
+            <label for="search" class="sr">{{ t('search_label') }}</label>
+            <input id="search" type="search" placeholder="{{ t('search_ph') }}" disabled>
+            <kbd dir="ltr">Ctrl K</kbd>
+          </div>
+        </section>
+
+        <section class="flow" aria-labelledby="flow-title">
+          <div class="sec-head">
+            <h2 id="flow-title">{{ t('flow_title') }}</h2>
+            <span class="muted">{{ t('flow_hint') }}</span>
+          </div>
+          <div class="flow-strip">
+            {% for f in cfg.flow %}
+            <button type="button" class="flow-step" data-open="{{ f.view }}" data-label="{{ cfg.views[f.view].text(lang) }}" {% if f.path %}data-path="{{ f.path }}"{% endif %}>
+              <span class="flow-num" aria-hidden="true">—</span>
+              <span class="flow-body">
+                <span class="flow-name">{{ f.text(lang) }} <i class="tag" dir="ltr">{{ f.tag }}</i></span>
+                <span class="flow-sub">{{ t('not_connected') }}</span>
+              </span>
+              {% if not loop.last %}<span class="flow-arrow">{{ icon('chevron', 20) }}</span>{% endif %}
+            </button>
+            {% endfor %}
+          </div>
+        </section>
+
+        <section class="cols">
+          <div class="card">
+            <h2>{{ t('quick_title') }}</h2>
+            <div class="quick">
+              {% for q in cfg.quick %}
+              <button type="button" class="quick-row" data-open="{{ q.view }}" data-label="{{ cfg.views[q.view].text(lang) }}" {% if q.path %}data-path="{{ q.path }}"{% endif %}>
+                <span class="quick-ic">{{ icon(q.icon, 18) }}</span>
+                <span class="quick-name">{{ q.text(lang) }}</span>
+                <span class="mono muted" dir="ltr">{{ q.tag }}</span>
+              </button>
+              {% endfor %}
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-head"><h2>{{ t('needs_title') }}</h2><span class="pill pill-amber">{{ icon('bell', 14) }}</span></div>
+            <p class="placeholder">{{ t('needs_wait') }}</p>
+            <button type="button" class="btn btn-ghost" data-open="poirot" data-label="{{ cfg.views['poirot'].text(lang) if 'poirot' in cfg.views else 'Poirot' }}">{{ t('open_poirot') }}</button>
+          </div>
+
+          <div class="card">
+            <h2>{{ t('recent_title') }}</h2>
+            <div id="recent" hx-get="/partials/recent" hx-trigger="load, kp:home from:body, every 30s">
+            </div>
+          </div>
+        </section>
+
+        <section class="card status" aria-labelledby="status-title">
+          <div class="card-head">
+            <h2 id="status-title">{{ t('status_title') }}</h2>
+            <div class="row-gap">
+              <button type="button" class="btn btn-dark" hx-post="/servers/all/start" hx-target="#status-grid" hx-swap="outerHTML">{{ icon('play', 13) }}{{ t('start_all') }}</button>
+              <button type="button" class="btn btn-ghost" hx-post="/servers/all/stop" hx-target="#status-grid" hx-swap="outerHTML">{{ icon('stop', 12) }}{{ t('stop_all') }}</button>
+            </div>
+          </div>
+          {% include "partials/status.html" %}
+        </section>
+
+        <footer class="foot">{{ spectrum() }}<span>{{ t('footer') }}</span></footer>
+      </div>
+    </section>
+  </div>
+</div>
+</div>
+
+<template id="tab-tpl"><div class="tab"><button type="button" role="tab" aria-selected="false" data-tab-select></button><button type="button" class="tab-x" data-tab-close aria-label="{{ t('close_tab') }}">{{ icon('close', 13) }}</button></div></template>
+</body>
+</html>
