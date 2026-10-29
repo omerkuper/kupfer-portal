@@ -82,8 +82,8 @@ The ports are the ones the systems' own `.env` files expect; the portal's `syste
 
 | System | How |
 |---|---|
-| Portal | none (127.0.0.1 only) |
-| RFQ desk | `DESK_KEY` in `.env`; a signed cookie (`app/security.py`) |
+| Portal | `KUPFER_PORTAL_KEY` in `.env` (stage 2); empty = no sign-in, as before |
+| RFQ desk | `DESK_KEY` in `.env`; a signed cookie (`app/security.py`) - or the portal's `kupfer_session` (stage 2) |
 | Poirot console | none (127.0.0.1 only); the customer page is a signed link (`POIROT_PORTAL_SECRET`) |
 | Tracker | optional bearer token for programs; the dashboard has none |
 
@@ -95,7 +95,7 @@ open the portal as `localhost`, never `127.0.0.1`.
 
 | Stage | Connection | Direction | Endpoint (proposed) | Owner | Notes |
 |---|---|---|---|---|---|
-| 2 | one session | portal → all | signed cookie `kupfer_session` on `localhost`; each system verifies it with a shared secret `KUPFER_SESSION_SECRET` | portal | each system keeps its own sign-in as a fallback |
+| 2 ✔ | one session (built 29 Oct) | portal → RFQ desk | signed cookie `kupfer_session` on `localhost` (`portal/session.py`), verified by the desk with the shared `KUPFER_SESSION_SECRET` (`app/security.py`) | portal | the desk's `DESK_KEY` stays as a fallback; Poirot and the tracker have no sign-in today, so there was nothing to unify - the same cookie can lock them later |
 | 4 | agent lookup | Poirot → RFQ | `GET /api/agents/{id}` · `GET /api/agents?q=` (`agents.v1`) | RFQ | built on `app/agent_book/api.py`; read-only |
 | 4 | customer list | RFQ → Poirot | `GET /api/clients/options` · `GET /api/clients/{id}` (`clients.v1`) | Poirot | id + name for pick lists; read-only |
 | 4 | counts for the flow strip | portal → RFQ, Poirot, tracker | one small read-only summary endpoint per system | each | the portal README's phase 2 |
@@ -107,6 +107,6 @@ open the portal as `localhost`, never `127.0.0.1`.
 | Repo | Tests | Tag |
 |---|---|---|
 | RFQ desk | 665 passed, 3 skipped | `pre-unify` |
-| Poirot | one test fixed (`test_dropped_ack_does_not_swallow_the_next.py` – the dropped draft had no `created_at`); rerun pending | `pre-unify` |
+| Poirot | 2,846 passed, 26 skipped (after one test fix: `test_dropped_ack_does_not_swallow_the_next.py` – the dropped draft had no `created_at`) | `pre-unify` |
 | Cargo tracker | 44 passed | `pre-unify` |
-| Portal | `tests/test_portal.py` present; pytest must be installed in its `.venv` (`pip install -r requirements.txt`) | `pre-unify` |
+| Portal | 25 passed | `pre-unify` |

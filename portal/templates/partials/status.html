@@ -12,14 +12,15 @@
     </div>
     <div class="srv-state">
       {% if state == EXTERNAL %}<span title="{{ t('external_note') }}">{{ t('external') }}</span>
-      {% elif state == CRASHED %}<span class="bad">{{ t('crashed') }} · {{ st[sid].exit_code }}</span>
+      {% elif state == CRASHED %}<span class="bad">{{ t('crashed') }}{% if st[sid].exit_code is not none and st[sid].exit_code >= 0 %} · {{ st[sid].exit_code }}{% endif %}</span>
+      {% elif state == CONFLICT %}<span class="bad">{{ t('conflict') }}</span>
       {% else %}{{ t(state) }}{% endif %}
     </div>
     {% if st[sid].error %}<div class="srv-err" dir="ltr">{{ st[sid].error }}</div>{% endif %}
     <div class="srv-actions">
       {% if state in ('stopped', CRASHED) %}
         <button type="button" class="btn btn-sm btn-primary" hx-post="/servers/{{ sid }}/start" hx-target="#status-grid" hx-swap="outerHTML">{{ icon('play', 11) }}{{ t('start') }}</button>
-      {% elif state in (RUNNING, STARTING) %}
+      {% elif state in (RUNNING, STARTING) or (state == CONFLICT and owned[sid]) %}
         <button type="button" class="btn btn-sm btn-ghost" hx-post="/servers/{{ sid }}/stop" hx-target="#status-grid" hx-swap="outerHTML">{{ icon('stop', 10) }}{{ t('stop') }}</button>
         {% if state == RUNNING %}<button type="button" class="btn btn-sm btn-ghost" hx-post="/servers/{{ sid }}/restart" hx-target="#status-grid" hx-swap="outerHTML" aria-label="{{ t('restart') }}" title="{{ t('restart') }}">{{ icon('restart', 14) }}</button>{% endif %}
       {% endif %}

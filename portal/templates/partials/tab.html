@@ -20,13 +20,16 @@
 </div>
 {% else %}
 <div class="tabview tabview-msg"
-  {% if state == STARTING %}hx-get="/partials/tab/{{ view.id }}?path={{ path|urlencode }}" hx-trigger="every 1500ms" hx-swap="outerHTML"{% endif %}>
+  {% if state in (STARTING, CONFLICT) %}hx-get="/partials/tab/{{ view.id }}?path={{ path|urlencode }}" hx-trigger="every {{ '1500ms' if state == STARTING else '4s' }}" hx-swap="outerHTML"{% endif %}>
   <div class="msg" data-state="{{ state }}">
     <span class="msg-ic">{{ icon(view.icon, 26) }}</span>
     {% if state == STARTING %}
       <h2>{{ t('starting_title', name=server.name) }}</h2>
       <p>{{ t('starting_text') }}</p>
       <div class="spinner" aria-hidden="true"></div>
+    {% elif state == CONFLICT %}
+      <h2>{{ t('conflict_title', port=server.port) }}</h2>
+      <p>{{ t('conflict_text', name=server.name) }}</p>
     {% elif state == CRASHED %}
       <h2>{{ t('crashed_title', name=server.name) }}</h2>
       <p>{{ t('crashed_text', code=status.exit_code) }}</p>
@@ -38,7 +41,7 @@
       <p>{{ t('off_text') }}</p>
     {% endif %}
     <div class="row-gap center">
-      {% if state != STARTING %}
+      {% if state not in (STARTING, CONFLICT) %}
       <button type="button" class="btn btn-primary" hx-post="/servers/{{ server.id }}/start?view={{ view.id }}&path={{ path|urlencode }}" hx-target="closest .tabview" hx-swap="outerHTML">{{ icon('play', 13) }}{{ t('start') }} {{ server.name }}</button>
       {% endif %}
       {% if has_log %}<a class="btn btn-ghost" href="/servers/{{ server.id }}/log" target="_blank" rel="noopener">{{ icon('log', 14) }}{{ t('open_log') }}</a>{% endif %}

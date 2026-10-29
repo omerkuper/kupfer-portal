@@ -8,6 +8,7 @@ import time
 from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import Optional
+from urllib.parse import quote as urlquote
 
 from starlette.applications import Starlette
 from starlette.concurrency import run_in_threadpool
@@ -22,17 +23,22 @@ from starlette.templating import Jinja2Templates
 from portal import i18n
 from portal.config import Config, View, load, safe_path
 from portal.recent import Recent
-from portal.supervisor import CRASHED, EXTERNAL, RUNNING, STARTING, Status, Supervisor
+from portal.session import COOKIE as SESSION_COOKIE, Session
+from portal.supervisor import CONFLICT, CRASHED, EXTERNAL, RUNNING, STARTING, Status, Supervisor
 
 HERE = Path(__file__).resolve().parent
 LOCAL_HOSTS = ("localhost", "127.0.0.1")
+DESK_COOKIE = "roark_desk"      # the RFQ desk's own sign-in cookie: signing out of the portal clears it too
+OPEN_PATHS = ("/login", "/healthz")   # reachable without a session (and /static)
 
 
 def create_app(config: Optional[Config] = None, supervisor: Optional[Supervisor] = None,
-               recent: Optional[Recent] = None, stop_on_exit: bool = True) -> Starlette:
+               recent: Optional[Recent] = None, stop_on_exit: bool = True,
+               session: Optional[Session] = None) -> Starlette:
     cfg = config or load()
     sup = supervisor or Supervisor(cfg.servers)
     rec = recent or Recent()
+    ses = session if session is not None else Session.from_env()
     templates = Jinja2Templates(directory=str(HERE / "templates"))
     asset_v = str(int(time.time()))
 
@@ -40,7 +46,7 @@ def create_app(config: Optional[Config] = None, supervisor: Optional[Supervisor]
     def ctx(request: Request, **extra) -> dict:
         lang = i18n.pick(request.cookies.get(i18n.COOKIE))
         return {"request": request, "lang": lang, "t": i18n.translator(lang), "cfg": cfg,
-                "dir": "ltr" if lang == "en" else "rtl", "v": asset_v, **extra}
+                "dir": "ltr" if lang == "en" else "rtl", "v": asset_v, "session_on": ses.on, **extra}
 
     def render(request: Request, name: str, status_code: int = 200, **extra) -> HTMLResponse:
         return templates.TemplateResponse(request, name, ctx(request, **extra), status_code=status_code)
@@ -138,6 +144,36 @@ def create_app(config: Optional[Config] = None, supervisor: Optional[Supervisor]
     async def healthz(request: Request) -> Response:
         return PlainTextResponse("ok")
 
+    # ------------------------------------------------------------------ the one sign-in (portal/session.py)
+    def signed_in(request: Request) -> bool:
+        return (not ses.on) or ses.signed_in(request.cookies.get(SESSION_COOKIE))
+
+    async def login_page(request: Request) -> Response:
+        if not ses.on:
+            return RedirectResponse("/", status_code=303)
+        nxt = safe_path(request.query_params.get("next"))
+        if signed_in(request):
+            return RedirectResponse(nxt, status_code=303)
+        return render(request, "login.html", next=nxt, error=bool(request.query_params.get("error")))
+
+    async def login(request: Request) -> Response:
+        if not ses.on:
+            return RedirectResponse("/", status_code=303)
+        form = await request.form()
+        nxt = safe_path(str(form.get("next") or "/"))
+        if not ses.key_matches(str(form.get("key") or "")):
+            return RedirectResponse(f"/login?error=1&next={urlquote(nxt, safe='/')}", status_code=303)
+        resp = RedirectResponse(nxt, status_code=303)
+        # No "domain": a host-only cookie on localhost, which the systems on the other ports receive as well.
+        resp.set_cookie(SESSION_COOKIE, ses.cookie_value(), max_age=ses.max_age, httponly=True, samesite="lax", path="/")
+        return resp
+
+    async def logout(request: Request) -> Response:
+        resp = RedirectResponse("/login" if ses.on else "/", status_code=303)
+        resp.delete_cookie(SESSION_COOKIE, path="/")
+        resp.delete_cookie(DESK_COOKIE, path="/")      # out of the portal = out of the RFQ desk too
+        return resp
+
     # ------------------------------------------------------------------ the guard
     class LocalOnly(BaseHTTPMiddleware):
         """Only this computer, and a POST only from the portal's own page (another site cannot start or stop
@@ -152,6 +188,13 @@ def create_app(config: Optional[Config] = None, supervisor: Optional[Supervisor]
                 origin = (request.headers.get("origin") or "").lower()
                 if origin not in {f"http://{h}" for h in allowed}:
                     return PlainTextResponse("forbidden origin", status_code=403)
+            path = request.url.path
+            if ses.on and path not in OPEN_PATHS and not path.startswith("/static/") and not signed_in(request):
+                if request.headers.get("HX-Request"):      # a partial: send the page to the sign-in, not the fragment
+                    return Response(status_code=401, headers={"HX-Redirect": "/login"})
+                if request.method != "GET":
+                    return PlainTextResponse("sign in first", status_code=401)
+                return RedirectResponse(f"/login?next={urlquote(path, safe='/')}", status_code=303)
             return await call_next(request)
 
     @asynccontextmanager
@@ -164,6 +207,9 @@ def create_app(config: Optional[Config] = None, supervisor: Optional[Supervisor]
         Route("/", home),
         Route("/lang", set_lang),
         Route("/healthz", healthz),
+        Route("/login", login_page),
+        Route("/login", login, methods=["POST"]),
+        Route("/logout", logout, methods=["POST"]),
         Route("/partials/status", status_partial),
         Route("/partials/recent", recent_partial),
         Route("/partials/tab/{view}", tab_partial),
@@ -175,6 +221,8 @@ def create_app(config: Optional[Config] = None, supervisor: Optional[Supervisor]
     app = Starlette(routes=routes, middleware=[Middleware(LocalOnly)], lifespan=lifespan)
     app.state.supervisor = sup
     app.state.config = cfg
+    app.state.session = ses
 
-    templates.env.globals.update(RUNNING=RUNNING, EXTERNAL=EXTERNAL, STARTING=STARTING, CRASHED=CRASHED)
+    templates.env.globals.update(RUNNING=RUNNING, EXTERNAL=EXTERNAL, STARTING=STARTING, CRASHED=CRASHED,
+                                 CONFLICT=CONFLICT)
     return app

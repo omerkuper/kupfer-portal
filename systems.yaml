@@ -3,9 +3,11 @@
 # The portal never changes these projects. It runs each one from its own folder, with its own
 # virtual environment (.venv), exactly the way you would from PyCharm or PowerShell.
 #
-# Ports: Poirot and the RFQ desk both default to 8000, so here the RFQ desk runs on 8001.
-# If another system calls the desk at a fixed address (Poirot's POIROT_QUOTE_URL, or the desk's
-# own PORTAL_BASE_URL in its .env), make sure it says 8001 too - or change the port here.
+# Ports, as the systems' own .env files expect them: the RFQ desk on 8000, Poirot on 8001
+# (Poirot's POIROT_QUOTE_URL points at the desk on 8000; the desk's POIROT_URL at Poirot on 8001).
+#
+# probe: how the portal knows it is really this system on the port - a page, and what it answers.
+# If another program sits on the port, the portal says so and never opens it in the system's tab.
 
 portal:
   port: 8080          # open the portal at http://localhost:8080
@@ -17,15 +19,17 @@ servers:
     name: Poirot
     folder: 'D:\poirot-project'
     python: '.venv\Scripts\python.exe'
-    args: ["-m", "uvicorn", "simulation_ui.serve:app", "--host", "127.0.0.1", "--port", "8000"]
-    port: 8000
+    args: ["-m", "uvicorn", "simulation_ui.serve:app", "--host", "127.0.0.1", "--port", "8001"]
+    port: 8001
+    probe: {path: /healthz, expect: '"heartbeat"'}      # the console (Poirot's REST API answers without it)
 
   - id: rfq
     name: RFQ Desk
     folder: 'D:\freight-engine-api 2\freight-engine-api-clean'
     python: '.venv\Scripts\python.exe'
-    args: ["-m", "uvicorn", "app.main:app", "--host", "127.0.0.1", "--port", "8001"]
-    port: 8001
+    args: ["-m", "uvicorn", "app.main:app", "--host", "127.0.0.1", "--port", "8000"]
+    port: 8000
+    probe: {path: /openapi.json, expect: '"Kupfer API"'}
 
   - id: tracker
     name: Tracker
@@ -34,6 +38,7 @@ servers:
     # read-only dashboard; add "--actions" to allow "check now" / "mark as seen" from it
     args: ["dashboard.py", "--no-browser", "--port", "8765"]
     port: 8765
+    probe: {path: /api/check-status, expect: '"enabled"'}
 
   - id: tracker_api
     name: Tracker API
@@ -41,6 +46,7 @@ servers:
     python: '.venv\Scripts\python.exe'
     args: ["api.py", "--port", "8770"]   # Poirot asks it for live status (POIROT_TRACKER_URL)
     port: 8770
+    probe: {path: /health, expect: ['"cargo-tracker"', 'wrong or missing token']}
 
 # The side rail: what each button opens. A view either lives on one of the servers above
 # (server + path - it opens as a tab inside the portal) or is an outside address (url - a new window).

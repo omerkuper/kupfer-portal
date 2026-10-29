@@ -69,7 +69,7 @@ h2 { margin: 0; font-size: 16.5px; font-weight: 800; }
 
 /* ---------------------------------------------------------------- tab bar */
 .tabbar { background: #E8ECF1; border-bottom: 1px solid #D5DCE5; display: flex; flex-wrap: wrap; align-items: flex-end; gap: 4px 10px; padding: 10px clamp(12px, 2vw, 24px) 0; flex: none; }
-.tabs { display: flex; gap: 4px; flex: 1 1 auto; min-width: 0; overflow-x: auto; scrollbar-width: thin; }
+.tabs { display: flex; flex-wrap: wrap; gap: 4px; flex: 1 1 auto; min-width: 0; }
 .tab { display: flex; align-items: center; height: 42px; border-radius: 10px 10px 0 0; background: #DCE2EA; flex: none; }
 .tab [role=tab] { height: 42px; border: 0; background: transparent; padding: 0 16px; font-size: 14px; font-weight: 600; color: var(--ink-2); cursor: pointer; white-space: nowrap; }
 .tab .tab-x { width: 32px; height: 32px; margin-inline-end: 4px; margin-inline-start: -8px; border: 0; border-radius: 8px; background: transparent; color: var(--muted); display: grid; place-items: center; cursor: pointer; }
@@ -204,3 +204,20 @@ h2 { margin: 0; font-size: 16.5px; font-weight: 800; }
   .flow-step { border-inline-end: 0; border-bottom: 1px solid var(--line-soft); }
   .flow-arrow { display: none; }
 }
+
+/* ---------------------------------------------------------------- sign-in (portal/session.py) */
+.loginpage { display: grid; place-items: center; padding: 24px; background: var(--navy); }
+.login { display: flex; flex-direction: column; align-items: center; gap: 22px; width: min(100%, 380px); }
+.login-brand { display: flex; align-items: center; gap: 14px; color: #FFFFFF; }
+.login-brand .wordmark { font-size: 40px; }
+.login-card { width: 100%; gap: 12px; }
+.login-card h1 { margin: 0; font-size: 20px; }
+.login-card label { font-size: 13.5px; font-weight: 700; color: var(--ink-2); }
+.login-card .input { height: 44px; border: 1px solid var(--line); border-radius: 10px; padding: 0 12px; font: inherit; font-size: 16px; color: var(--ink); background: var(--ground); }
+.login-card .input:focus { outline: 3px solid var(--orange); outline-offset: 1px; border-color: var(--copper); }
+.login-card .bad { margin: 0; font-size: 14px; }
+.login-card .btn { height: 44px; margin-top: 4px; }
+.login-lang { color: var(--rail-text); border-color: var(--navy-line); background: transparent; }
+.login .foot { color: var(--rail-text); }
+.logout { margin: 0; }
+.logout .btn-lang { display: inline-flex; align-items: center; padding: 0 10px; gap: 6px; font-size: 13px; cursor: pointer; }

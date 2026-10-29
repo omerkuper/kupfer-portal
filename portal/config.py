@@ -24,6 +24,8 @@ class Server:
     python: str
     args: tuple[str, ...]
     port: int
+    probe_path: str = ""                  # a page that tells who answers on the port
+    probe_expect: tuple[str, ...] = ()    # any of these in its answer = it is this system
 
     def python_path(self) -> Path:
         p = Path(self.python)
@@ -85,6 +87,17 @@ def _req(d: dict, key: str, where: str):
     return d[key]
 
 
+def _probe(raw, where: str) -> dict:
+    if not raw:
+        return {}
+    path = safe_path(str(_req(raw, "path", f"{where}.probe")))
+    expect = raw.get("expect")
+    expect = [expect] if isinstance(expect, str) else list(expect or [])
+    if not expect:
+        raise ConfigError(f"systems.yaml: '{where}.probe' needs 'expect' - what the right system answers")
+    return {"probe_path": path, "probe_expect": tuple(str(e) for e in expect)}
+
+
 def load(path: Optional[Path] = None) -> Config:
     path = Path(path or os.getenv("KUPFER_PORTAL_CONFIG") or DEFAULT_FILE)
     try:
@@ -108,6 +121,7 @@ def load(path: Optional[Path] = None) -> Config:
             python=str(_req(s, "python", where)),
             args=tuple(str(a) for a in (s.get("args") or [])),
             port=int(_req(s, "port", where)),
+            **_probe(s.get("probe"), where),
         )
 
     views: dict[str, View] = {}

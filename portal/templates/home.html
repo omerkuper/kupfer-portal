@@ -39,6 +39,7 @@
     <div class="tabbar-end">
       <span id="summary" class="summary"><i class="dot" data-state="{{ 'running' if up == total else 'starting' if up else 'stopped' }}"></i>{{ t('running_count', n=up, m=total) }}</span>
       <a class="btn-lang" href="/lang?to={{ 'he' if lang == 'en' else 'en' }}" aria-label="{{ t('lang_switch_label') }}">{{ t('lang_switch') }}</a>
+      {% if session_on %}<form method="post" action="/logout" class="logout"><button type="submit" class="btn-lang" title="{{ t('logout_label') }}" aria-label="{{ t('logout_label') }}">{{ icon('logout', 15) }}<span>{{ t('logout') }}</span></button></form>{% endif %}
     </div>
   </div>
 
