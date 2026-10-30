@@ -54,7 +54,8 @@ KUPFER_POIROT_TOKEN=<Poirot's POIROT_INTAKE_TOKEN (or POIROT_API_TOKEN)>
 KUPFER_TRACKER_TOKEN=<the tracker's TRACKER_API_TOKEN - leave out when it has none>
 ```
 
-A system that is off, slow or without a token shows "—". The contracts (`summary.v1`) are in `CONTRACTS.md`.
+A system that is off, slow or without a token shows "—". The portal waits `KUPFER_SUMMARY_TIMEOUT` seconds for each
+(8 by default; the desk asks Supabase in the cloud). The contracts (`summary.v1`) are in `CONTRACTS.md`.
 
 ## Settings: `systems.yaml`
 

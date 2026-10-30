@@ -1,0 +1,925 @@
+Claude
+
+
+Poirot file sketch b full · HTML
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Poirot · דף תיק · סקיצה B</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f4f6fa;--card:#fff;--ink:#1e293b;--strong:#0f172a;--muted:#64748b;--line:#e2e8f0;--line2:#eef2f7;--navy:#0b2545;--blue:#2563eb;--blue-bg:#eff6ff;--teal:#0f766e;--amber:#e2a673}
+html[data-theme=dark]{--bg:#070b1a;--card:#111833;--ink:#e5e7eb;--strong:#f8fafc;--muted:#94a3b8;--line:#1f2a4a;--line2:#18223f;--blue-bg:#13224a}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{font-family:Heebo,Arial,sans-serif;font-size:13.5px;color:var(--ink);background:var(--bg);display:flex;flex-direction:column;overflow:hidden}
+button{font:inherit;color:inherit;cursor:pointer}
+input,textarea,select{font:inherit;color:var(--ink);background:var(--card)}
+/* top bar */
+.top{height:44px;flex:none;background:var(--navy);color:#fff;display:flex;align-items:center;gap:14px;padding:0 18px}
+.brand{font-family:Georgia,serif;font-size:20px;color:var(--amber);font-weight:700;display:flex;align-items:center;gap:6px}
+.brand i{width:22px;height:14px;border-radius:2px;background:linear-gradient(90deg,#16a34a 0 25%,#f59e0b 25% 50%,#2563eb 50% 75%,#e11d48 75%);display:inline-block}
+.top .sub{font-size:12px;color:#c7d2fe}
+.top .sp{flex:1}
+.seg{display:inline-flex;border:1px solid #334e7a;border-radius:999px;overflow:hidden}
+.seg button{background:none;border:0;color:#cbd5e1;padding:3px 11px;font-size:12px}
+.seg button.on{background:#16a34a;color:#fff;font-weight:700}
+.seg.lang button.on{background:#fff;color:var(--navy)}
+.themebtn{background:#fff;color:#0f172a;border:0;border-radius:999px;padding:0 12px;height:24px;font-size:12px;font-weight:700}
+/* layout */
+.wrap{flex:1;display:grid;grid-template-columns:270px minmax(0,1fr) 330px;gap:12px;padding:12px;min-height:0}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:14px;min-height:0}
+/* right: files */
+.files{display:flex;flex-direction:column;padding:12px;gap:8px}
+.files h3{margin:0;font-size:13px;display:flex;justify-content:space-between}
+.files input{border:1px solid var(--line);border-radius:10px;padding:8px 10px;font-size:13px}
+.fchips{display:flex;gap:5px;flex-wrap:wrap}
+.fchip{border:1px solid var(--line);background:var(--card);border-radius:999px;padding:2px 10px;font-size:12px}
+.fchip.on{background:var(--navy);color:#fff;border-color:var(--navy)}
+.flist{overflow:auto;display:flex;flex-direction:column;gap:4px;margin:0 -4px;padding:0 4px}
+.fi{border-radius:10px;padding:8px 10px;border:1px solid transparent;cursor:pointer}
+.fi:hover{background:var(--blue-bg)}
+.fi.on{background:var(--blue-bg);border-inline-start:3px solid var(--blue)}
+.fi b{display:block;font-size:13px;direction:ltr;text-align:right}
+.fi span{font-size:12px;color:var(--muted)}
+.fi .dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:#16a34a;margin-inline-start:6px}
+.fi .dot.need{background:#dc2626}
+/* center: conversation */
+.conv{display:flex;flex-direction:column;overflow:hidden;position:relative}
+.cbar{display:flex;align-items:center;gap:4px;padding:9px 12px;border-bottom:1px solid var(--line);flex:none;flex-wrap:wrap}
+.cbar .ttl{font-weight:800;font-size:15px;color:var(--strong);margin-inline-end:4px}
+.chip{border:1px solid var(--line);background:var(--card);border-radius:999px;padding:2px 8px;font-size:12px}
+.chip.on{background:var(--navy);color:#fff;border-color:var(--navy)}
+.chip b{font-weight:400;opacity:.75;margin-inline-start:3px}
+.sp{flex:1}
+.lnk{background:none;border:0;color:var(--blue);font-size:12px;padding:2px 4px}
+.parties{border:1px dashed #94a3b8;border-radius:999px;padding:2px 10px;font-size:12px;background:var(--card);position:relative}
+.pop{position:absolute;top:calc(100% + 6px);left:0;background:var(--card);border:1px solid var(--line);border-radius:12px;box-shadow:0 12px 32px rgba(2,6,23,.18);padding:8px;min-width:280px;z-index:20;display:none;text-align:right}
+.pop.open{display:block}
+.pop div{display:flex;gap:8px;align-items:center;padding:5px 6px;font-size:12.5px;border-radius:8px}
+.role{border-radius:6px;padding:1px 7px;font-size:11px;font-weight:700}
+.r-fwd{background:#dbeafe;color:#1e40af}.r-cus{background:#dcfce7;color:#166534}.r-sup{background:#fef3c7;color:#92400e}.r-poi{background:#ede9fe;color:#5b21b6}.r-me{background:#e2e8f0;color:#334155}
+.needs{flex:none;margin:8px 12px 0;border:1.5px solid #f59e0b;background:#fffbeb;border-radius:12px;padding:8px 12px;display:flex;gap:10px;align-items:center;font-size:13px}
+html[data-theme=dark] .needs{background:#2a1f05}
+.needs b{color:#b45309}
+.btn{border:1px solid var(--line);background:var(--card);border-radius:8px;padding:4px 11px;font-size:12.5px}
+.btn.go{background:var(--teal);border-color:var(--teal);color:#fff;font-weight:700}
+.feed{flex:1;overflow:auto;padding:8px 12px 12px;display:flex;flex-direction:column;gap:5px}
+.day{display:flex;align-items:center;gap:10px;color:var(--muted);font-size:11.5px;margin:6px 0 2px}
+.day::before,.day::after{content:"";flex:1;border-top:1px dashed var(--line)}
+.msg{border:1px solid var(--line2);border-radius:10px;background:var(--card);flex:none;transition:box-shadow .15s}
+.msg:hover{box-shadow:0 1px 0 var(--line),0 2px 10px rgba(15,23,42,.06)}
+.mh{display:grid;grid-template-columns:24px 150px minmax(0,1fr) 92px 62px;gap:10px;align-items:center;padding:7px 10px;cursor:pointer}
+body.roomy .mh{padding:11px 12px}
+.dir{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:7px;font-size:12px;font-weight:800}
+.d-in{background:#dcfce7;color:#166534}.d-out{background:#dbeafe;color:#1e40af}.d-note{background:#fef3c7;color:#92400e}.d-bot{background:#ede9fe;color:#5b21b6}
+.who{font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--strong)}
+.who small{display:block;font-weight:400;color:var(--muted);font-size:11.5px}
+.sn{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--muted);direction:ltr;text-align:right}
+.sn b{color:var(--strong);font-weight:700}
+.sn.he{direction:rtl}
+.tm{color:var(--muted);font-size:12px;direction:ltr;text-align:right;white-space:nowrap}
+.st{font-size:11px;border-radius:999px;padding:1px 8px;text-align:center;white-space:nowrap}
+.s-new{background:var(--blue);color:#fff;font-weight:700}.s-sent{background:#dcfce7;color:#166534}.s-read{background:#f1f5f9;color:#475569}.s-int{background:#fef3c7;color:#92400e}.s-sys{background:#ede9fe;color:#5b21b6}
+html[data-theme=dark] .s-read{background:#1f2a4a;color:#cbd5e1}
+html[data-theme=dark] .s-sent,html[data-theme=dark] .ok,html[data-theme=dark] .d-in,html[data-theme=dark] .r-cus{background:#0f3a24;color:#86efac}
+html[data-theme=dark] .d-out,html[data-theme=dark] .r-fwd{background:#13224a;color:#93c5fd}
+html[data-theme=dark] .d-note,html[data-theme=dark] .s-int,html[data-theme=dark] .r-sup{background:#2a1f05;color:#fcd34d}
+html[data-theme=dark] .d-bot,html[data-theme=dark] .s-sys,html[data-theme=dark] .r-poi{background:#24164a;color:#c4b5fd}
+html[data-theme=dark] .r-me{background:#1f2a4a;color:#cbd5e1}
+.msg.unread{background:var(--blue-bg);border-color:#bfdbfe}
+html[data-theme=dark] .msg.unread{border-color:#1e3a8a}
+.msg.open{border:1.5px solid var(--blue);box-shadow:0 4px 18px rgba(37,99,235,.12)}
+.mb{display:none;padding:2px 46px 12px 16px}
+.msg.open .mb{display:block}
+.mb .meta{font-size:12px;color:var(--muted);margin-bottom:8px}
+.mb .txt{direction:ltr;text-align:left;line-height:1.6;white-space:pre-line;color:var(--ink)}
+.mb .txt.he{direction:rtl;text-align:right}
+.mb .acts{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap}
+.att{border:1px solid var(--line);border-radius:8px;padding:3px 9px;font-size:12px;background:var(--bg)}
+.sys{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:12px;padding:4px 10px;border:1px dashed var(--line);border-radius:10px;flex:none;cursor:pointer}
+.sys .lst{display:none}
+.sys.open{flex-direction:column;align-items:stretch}
+.sys.open .lst{display:block;padding:4px 30px 2px 0;line-height:1.7}
+.empty{color:var(--muted);text-align:center;padding:30px}
+/* compose */
+.comp{flex:none;border-top:1px solid var(--line);padding:9px 12px;background:var(--card)}
+.comp .fold{display:flex;gap:8px;align-items:center}
+.to{background:#1e40af;color:#fff;border:0;border-radius:999px;padding:5px 13px;font-size:12.5px;font-weight:700}
+.fake{flex:1;border:1px solid var(--line);border-radius:10px;padding:8px 12px;color:var(--muted);text-align:right;background:var(--card)}
+.comp .full{display:none;flex-direction:column;gap:8px}
+.comp.open .fold{display:none}.comp.open .full{display:flex}
+.comp textarea{border:1px solid var(--line);border-radius:10px;padding:10px 12px;min-height:110px;resize:vertical;direction:ltr;text-align:left}
+.comp .row{display:flex;gap:8px;align-items:center}
+.comp select{border:1px solid var(--line);border-radius:8px;padding:5px 8px}
+/* left: the file */
+.side{display:flex;flex-direction:column;gap:12px;overflow:auto;min-height:0}
+.fcard{padding:14px;border:1.5px solid var(--navy)}
+html[data-theme=dark] .fcard{border-color:#334e7a}
+.fcard h1{margin:0 0 8px;font-size:19px;direction:ltr;text-align:right;color:var(--strong);display:flex;gap:8px;align-items:center;justify-content:flex-end}
+.pen{background:none;border:0;color:var(--muted);font-size:13px;padding:0}
+.pills{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.pill{border:1px solid #15803d;color:#15803d;border-radius:999px;padding:0 9px;font-size:12px;background:var(--card)}
+.ok{background:#dcfce7;color:#166534;border-radius:999px;padding:1px 9px;font-size:12px}
+.ub{background:var(--blue);color:#fff;border:0;border-radius:999px;padding:1px 9px;font-size:12px;font-weight:700}
+.facts{font-size:13px;line-height:1.7}
+.facts b{color:var(--strong)}
+.facts .ref{direction:ltr;display:inline-block}
+.facts .k{color:var(--muted);font-size:11.5px}
+.fbtns{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap}
+.box{padding:12px 14px}
+.box h3{margin:0 0 8px;font-size:12px;color:var(--muted);font-weight:700;letter-spacing:.02em}
+.steps{display:flex;gap:5px;flex-wrap:wrap}
+.steps button{border:1px solid var(--line);background:var(--card);border-radius:999px;padding:2px 10px;font-size:12px}
+.steps button.done{background:#dcfce7;border-color:#86efac;color:#166534}
+.steps button.on{background:var(--teal);border-color:var(--teal);color:#fff;font-weight:700}
+.dates{display:grid;grid-template-columns:1fr 1fr;gap:8px 12px;font-size:12.5px}
+.dates span{color:var(--muted);font-size:11.5px;display:block}
+/* the summary drawer */
+.dim{position:fixed;inset:0;background:rgba(2,6,23,.45);display:none;z-index:40}
+.dim.open{display:block}
+.modal{position:fixed;top:60px;left:50%;transform:translateX(-50%);width:min(560px,92vw);background:var(--card);border-radius:16px;padding:18px 20px;z-index:41;display:none;box-shadow:0 24px 60px rgba(2,6,23,.35)}
+.modal.open{display:block}
+.modal h2{margin:0 0 10px;font-size:17px}
+.modal table{width:100%;border-collapse:collapse;font-size:13px}.modal td{padding:6px 4px;border-bottom:1px solid var(--line2)}.modal td:first-child{color:var(--muted);width:40%}
+
+/* ===== the file's status (the old rail) - three placements ===== */
+.only-a,.only-b,.only-c{display:none!important}
+body.v-a .only-a{display:block!important}
+body.v-b .only-b{display:grid!important}
+body.v-c .only-c{display:flex!important}
+.warn{color:#c2410c;font-weight:700}
+html[data-theme=dark] .warn{color:#fdba74}
+.lnk2{background:none;border:0;color:var(--blue);font-size:12px;padding:0}
+/* A: a card of its own in the side column */
+.rail .grp{display:flex;flex-direction:column;gap:5px}
+.rail .hd{display:flex;justify-content:space-between;align-items:center;margin-bottom:2px}
+.rail .hd span{font-size:11.5px;color:var(--muted);font-weight:800;letter-spacing:.03em}
+.kv{display:flex;justify-content:space-between;gap:10px;font-size:12.5px;align-items:baseline}
+.kv .k{color:var(--muted);white-space:nowrap}
+.kv .v{text-align:left;color:var(--strong);min-width:0}
+.kv .v.chipv{border:1px solid #fdba74;background:#fff7ed;border-radius:8px;padding:0 7px;color:#9a3412}
+html[data-theme=dark] .kv .v.chipv{background:#2a1605;border-color:#7c2d12;color:#fdba74}
+.kv button.v{background:none;border:0;color:var(--blue);padding:0;font-size:12.5px}
+.rail hr{border:0;border-top:1px solid var(--line2);margin:9px 0}
+/* B: tiles inside the file card */
+.tiles{margin-top:10px;padding-top:10px;border-top:1px solid var(--line2);grid-template-columns:repeat(6,1fr);gap:5px}
+.tiles .cap{grid-column:1/-1;display:flex;justify-content:space-between;font-size:11px;color:var(--muted);font-weight:800;letter-spacing:.03em;margin-top:2px}
+.tile{grid-column:span 2;border:1px solid var(--line);border-radius:9px;padding:4px 7px;text-align:right;background:var(--bg);min-width:0}
+.tile.w3{grid-column:span 3}
+.tile span{display:block;font-size:10.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tile b{display:block;font-size:12.5px;color:var(--strong);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tile.is-warn{border-color:#f59e0b;background:#fffbeb}
+.tile.is-warn b{color:#9a3412}
+html[data-theme=dark] .tile.is-warn{background:#2a1f05}
+html[data-theme=dark] .tile.is-warn b{color:#fdba74}
+.tile:hover{border-color:var(--blue)}
+/* C: a status bar along the bottom */
+.sbar{flex:none;height:32px;background:var(--card);border-top:1px solid var(--line);align-items:center;gap:4px;padding:0 14px;font-size:12px;white-space:nowrap;overflow:hidden}
+.sbar .g{font-weight:800;color:var(--muted);font-size:11px;letter-spacing:.03em;margin-inline-start:6px}
+.sbar .si{background:none;border:1px solid transparent;border-radius:7px;padding:2px 7px;display:inline-flex;gap:5px;align-items:baseline}
+.sbar .si:hover{background:var(--blue-bg);border-color:var(--line)}
+.sbar .si span{color:var(--muted)}
+.sbar .si b{color:var(--strong);font-weight:700}
+.sbar .si.is-warn{background:#fff7ed;border-color:#fdba74}
+.sbar .si.is-warn b{color:#9a3412}
+html[data-theme=dark] .sbar .si.is-warn{background:#2a1605;border-color:#7c2d12}
+html[data-theme=dark] .sbar .si.is-warn b{color:#fdba74}
+.sbar .sep{width:1px;height:16px;background:var(--line);margin:0 6px}
+body.v-c .sk{bottom:46px}
+/* the drawer ("open") */
+.drawer{position:fixed;top:44px;bottom:0;left:0;width:440px;max-width:94vw;background:var(--card);border-inline-end:1px solid var(--line);box-shadow:12px 0 40px rgba(2,6,23,.25);z-index:45;transform:translateX(-105%);transition:transform .2s ease;display:flex;flex-direction:column}
+.drawer.open{transform:none}
+.dr-h{display:flex;align-items:center;gap:6px;padding:12px 14px;border-bottom:1px solid var(--line)}
+.dr-h b{font-size:15px;color:var(--strong);margin-inline-end:8px}
+.dr-tab{border:1px solid var(--line);background:var(--card);border-radius:999px;padding:2px 11px;font-size:12px}
+.dr-tab.on{background:var(--navy);color:#fff;border-color:var(--navy)}
+.dr-x{background:none;border:0;font-size:16px;color:var(--muted)}
+.dr-b{flex:1;overflow:auto;padding:12px 14px;display:flex;flex-direction:column;gap:12px}
+.dr-b[hidden]{display:none}
+.dr-sec{border:1px solid var(--line);border-radius:12px;padding:10px 12px}
+.dr-sec h4{margin:0 0 6px;font-size:13px;color:var(--strong);display:flex;justify-content:space-between;align-items:center}
+.dr-sec p{margin:4px 0;font-size:12.5px;color:var(--ink)}
+.dr-sec .m{color:var(--muted);font-size:12px}
+.req{display:flex;align-items:center;gap:8px;font-size:12.5px;padding:3px 0;cursor:pointer}
+.req i{font-style:normal;width:18px;height:18px;border-radius:5px;display:inline-grid;place-items:center;font-size:11px;border:1px solid var(--line)}
+.req.done i{background:#dcfce7;border-color:#86efac;color:#166534}
+.req.miss i{background:#fff7ed;border-color:#fdba74;color:#c2410c}
+.req.miss{color:#9a3412}
+html[data-theme=dark] .req.miss{color:#fdba74}
+.req.wait{color:var(--muted)}
+.doc{display:flex;align-items:center;gap:8px;font-size:12.5px;padding:3px 0}
+.doc .nm{direction:ltr;flex:1;text-align:right}
+.newb{background:var(--blue);color:#fff;border-radius:999px;padding:0 7px;font-size:11px;font-weight:700}
+.segm{display:inline-flex;border:1px solid var(--line);border-radius:999px;overflow:hidden}
+.segm button{border:0;background:var(--card);padding:3px 12px;font-size:12px}
+.segm button.on{background:var(--teal);color:#fff;font-weight:700}
+.task{display:flex;gap:8px;align-items:center;font-size:12.5px;padding:2px 0}
+.sk .vs{display:inline-flex;border:1px solid #334155;border-radius:999px;overflow:hidden}
+.sk .vs button{background:none;border:0;color:#cbd5e1;padding:2px 10px;font-size:12px}
+.sk .vs button.on{background:var(--amber);color:#0f172a;font-weight:800}
+.side>*{flex:none}
+.needs[hidden]{display:none}
+/* ===== Poirot's own compose CSS - copied verbatim from kupfer.css / console.css (tokens, buttons, the writing window) ===== */
+.fp, .ib, html[data-theme=light] .fp, html[data-theme=light] .ib {
+  --k-bg: #f4f3ee; --k-surface: #ffffff; --k-surface2: #fafaf7; --k-line: #e3e1da; --k-line2: #eeece5;
+  --k-fg: #1c1b18; --k-muted: #5f5c55; --k-faint: #c9c6bd; --k-link: #1f4e8c; --k-btn: #1f4e8c; --k-btn-fg: #ffffff;
+  --k-ok: #1e7a4a; --k-ok-bg: #e3f2e9; --k-warn: #b45309; --k-warn-bg: #fbf1e3;
+  --k-stop: #8a1f1f; --k-stop-dot: #b42323; --k-stop-bg: #fbeaea; --k-stop-line: #e8b4b4;
+  --k-blue: #1f4e8c; --k-blue-bg: #e8eef8; --k-sel: #eef3fa; --k-dim: rgba(28, 27, 24, .22);
+  --k-shadow: 0 8px 22px rgba(0, 0, 0, .12);
+}
+html[data-theme=dark] .fp, html[data-theme=dark] .ib {
+  --k-bg: #1a1d22; --k-surface: #23272e; --k-surface2: #1f2329; --k-line: #343a43; --k-line2: #2c313a;
+  --k-fg: #e8e6e1; --k-muted: #a6a39b; --k-faint: #4a5160; --k-link: #8fb3e6; --k-btn: #3b6db3; --k-btn-fg: #ffffff;
+  --k-ok: #6cc08b; --k-ok-bg: #1f3a2b; --k-warn: #e0a458; --k-warn-bg: #3a2e1c;
+  --k-stop: #f0a3a3; --k-stop-dot: #d94848; --k-stop-bg: #3a2224; --k-stop-line: #5a3335;
+  --k-blue: #8fb3e6; --k-blue-bg: #243249; --k-sel: #2a3442; --k-dim: rgba(0, 0, 0, .45);
+  --k-shadow: 0 8px 22px rgba(0, 0, 0, .35);
+}
+.fp .k-lnk { font: inherit; font-size: 12px; padding: 0; border: 0; background: transparent; color: var(--k-link); cursor: pointer; }
+.fp .btn { font: inherit; font-size: 13px; font-weight: 500; padding: 8px 16px; border-radius: 8px; border: 1px solid var(--k-line); background: var(--k-surface); color: var(--k-fg); box-shadow: none; cursor: pointer; text-transform: none; letter-spacing: 0; }
+.fp .btn:hover { background: var(--k-surface2); }
+.fp .btn-primary { border-color: var(--k-btn); background: var(--k-btn); color: var(--k-btn-fg); }
+.fp .btn-primary:hover { background: var(--k-btn); filter: brightness(1.06); }
+.fp .btn-small { padding: 6px 12px; font-size: 12.5px; }
+.fp .sl-pick { display: flex; gap: 14px; flex-wrap: wrap; } .fp .sl-note { color: var(--k-muted); font-size: 12.5px; margin: 6px 0 0; }
+.fp .fp-write { border-top: 1px solid var(--k-line2); background: var(--k-surface2); padding: 10px 22px 12px; }
+.fp .fp-write #translation:not(:empty) { margin-bottom: 8px; }
+.fp .compose { background: transparent; border: 0; box-shadow: none; padding: 0; margin: 0; max-width: none; border-radius: 0; display: flex; flex-direction: column; gap: 8px; }
+.fp .compose::before, .fp .compose::after { display: none; }
+.fp .targets { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.fp .targets-label { font-size: 11px; font-weight: 600; letter-spacing: .08em; color: var(--k-muted); margin-inline-end: 4px; }
+.fp .pill-wrap { display: inline-flex; align-items: center; gap: 2px; }
+.fp .targets .pill { font-size: 13px; font-weight: 400; padding: 5px 12px; border-radius: 999px; border: 1px solid var(--k-line); background: var(--k-surface); color: var(--k-fg); cursor: pointer; display: inline-flex; align-items: center; gap: 6px; box-shadow: none; }
+.fp .targets .pill:has(input:checked) { border-color: var(--k-btn); background: var(--k-btn); color: var(--k-btn-fg); font-weight: 500; }
+.fp .targets .pill input { position: absolute; opacity: 0; width: 0; height: 0; margin: 0; }
+.fp .targets .pill-dot { display: none; }
+.fp .pill-note { font-size: 10px; font-weight: 700; letter-spacing: .06em; color: var(--k-warn); text-transform: uppercase; }
+.fp .targets .pill:has(input:checked) .pill-note { color: #ffd9a8; }
+.fp .pill-unset { color: var(--k-muted); }
+.fp .pill-edit { font: inherit; width: 24px; height: 24px; border-radius: 999px; border: 0; background: transparent; color: var(--k-muted); cursor: pointer; display: inline-grid; place-items: center; padding: 0; }
+.fp .pill-edit:hover { background: var(--k-line2); }
+.fp .pill-edit svg { width: 13px; height: 13px; stroke: currentColor; fill: none; stroke-width: 2; }
+.fp .pill-add { padding: 5px 12px; border: 1px dashed var(--k-faint); background: transparent; color: var(--k-link); font-size: 13px; border-radius: 999px; cursor: pointer; }
+.fp .compose textarea { width: 100%; min-height: 42px; font-size: 14px; line-height: 1.5; padding: 10px 14px; border: 1px solid var(--k-line); border-radius: 8px; background: var(--k-surface); color: var(--k-fg); resize: vertical; box-shadow: none; }
+.fp .reply-routing { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 13px; color: var(--k-muted); background: transparent; border: 0; padding: 0; margin: 0; }
+.fp .routing-label { color: var(--k-muted); } .fp .routing-arrow { display: none; }
+.fp .route-toggle { font-size: 13px; padding: 4px 12px; border-radius: 999px; border: 1px solid var(--k-line); background: var(--k-surface); color: var(--k-fg); cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
+.fp .route-toggle:has(input:checked) { border-color: var(--k-btn); background: var(--k-btn); color: var(--k-btn-fg); }
+.fp .route-toggle input { position: absolute; opacity: 0; width: 0; height: 0; margin: 0; }
+.fp .route-toggle[hidden] { display: none; }
+.fp .compose-foot { display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap; padding: 0; margin: 0; border: 0; background: transparent; }
+.fp .foot-left { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+.fp .attach-pick, .fp .inline-field, .fp .remind-btn, .fp .from-file summary { font: inherit; font-size: 13px; color: var(--k-link); background: transparent; border: 0; padding: 0; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
+.fp .inline-field { color: var(--k-fg); }
+.fp .attach-icon svg, .fp .remind-btn .ic { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2; }
+.fp .attach-pick input[type=file] { display: none; }
+.fp .compose-foot .actions { display: flex; gap: 10px; align-items: center; }
+.fp .btn-preview { border: 1px solid var(--k-line); background: var(--k-surface); color: var(--k-fg); }
+.fp .send-split { display: inline-flex; }
+.fp .send-split .btn:first-child { border-radius: 8px 0 0 8px; } .fp .send-split .send-later-btn { border-radius: 0 8px 8px 0; border-inline-start: 1px solid rgba(255, 255, 255, .35); padding-inline: 10px; }
+[dir=rtl] .fp .send-split .btn:first-child { border-radius: 0 8px 8px 0; } [dir=rtl] .fp .send-split .send-later-btn { border-radius: 8px 0 0 8px; }
+.fp .send-split .ic { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2; margin-inline-start: 6px; }
+.fp .party-form, .fp .send-later, .fp .from-file-list, .fp .reply-quote { background: var(--k-surface); border: 1px solid var(--k-line); border-radius: 8px; padding: 12px 14px; }
+.fp .party-add > summary, .fp .send-later > summary { display: none; }
+.fp .comp-folded { display: none; width: 100%; text-align: start; padding: 2px 0; border: 0; background: transparent; color: var(--k-fg); font: inherit; font-size: 14px; align-items: center; gap: 12px; cursor: text; }
+.fp .comp-folded .chip-to { font-size: 13px; font-weight: 500; padding: 5px 12px; border-radius: 999px; background: var(--k-btn); color: var(--k-btn-fg); white-space: nowrap; }
+.fp .comp-folded .fake { flex: 1 1 0; padding: 9px 14px; border: 1px solid var(--k-line); border-radius: 8px; background: var(--k-surface); color: var(--k-muted); text-align: start; }
+.fp .fp-write[data-folded="1"] .comp-folded { display: flex; }
+.fp .fp-write[data-folded="1"] #compose, .fp .fp-write[data-folded="1"] #translation, .fp .fp-write[data-folded="1"] .ask-hint { display: none; }
+.fp .fold-lnk { margin-inline-start: auto; font-size: 12px; color: var(--k-muted); }
+/* send to: per person, per channel */
+.fp .send-to { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin: 8px 0 2px; }
+.fp .sendto-person { display: inline-flex; align-items: center; gap: 4px; padding: 3px 4px 3px 10px; border: 1px solid var(--k-line); border-radius: 999px; background: var(--k-surface); font-size: 13px; }
+.fp .sendto-name { font-weight: 500; margin-inline-end: 4px; }
+.fp .sendto-chip { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; padding: 2px 9px; border-radius: 999px; border: 1px solid var(--k-line); color: var(--k-muted); cursor: pointer; }
+.fp .sendto-chip input { width: 12px; height: 12px; margin: 0; accent-color: var(--k-btn); }
+.fp .sendto-chip:has(input:checked) { border-color: var(--k-btn); background: var(--k-sel); color: var(--k-link); }
+.fp .sendto-chip.off { opacity: .45; cursor: not-allowed; }
+.fp .sendto-sum { margin-inline-start: 4px; }
+.fp .send-to[hidden] { display: none; }
+.fp .sendto-chip { flex-direction: row; }
+.fp .pf-people .k-caps { white-space: nowrap; }
+.fp .party-form .contact-rows { display: flex; flex-direction: column; }
+.fp .targets .pill-add { width: auto; height: auto; font-size: 13px; font-weight: 400; display: inline-flex; padding: 5px 12px; }
+/* THE WRITING WINDOW (20 Oct, his sketch C): open, the composer is a window in the middle of the screen, the page dimmed */
+.fp .cw-dim { display: none; }
+.fp .cw-dim:has(+ .fp-write[data-folded="0"]) { display: block; position: fixed; inset: 0; z-index: 900; background: rgba(12, 18, 30, .5); backdrop-filter: blur(2px); }
+body:has(.fp-write[data-folded="0"]) { overflow: hidden; }
+.fp .fp-write[data-folded="0"] { position: fixed; z-index: 901; top: 4vh; left: 0; right: 0; margin: 0 auto; width: min(880px, calc(100vw - 32px)); max-height: 92vh;
+  display: flex; flex-direction: column; overflow: auto; padding: 0; border: 1px solid var(--k-line); border-radius: 16px; background: var(--k-surface);
+  box-shadow: 0 30px 80px rgba(0, 0, 0, .35); }
+.fp .fp-write[data-folded="0"] .comp-folded { display: none; }
+.fp .fp-write[data-folded="0"] .compose { gap: 0; flex: 1 0 auto; }
+.fp .fp-write[data-folded="0"] .ask-hint { padding: 6px 20px; }
+.fp .fp-write[data-folded="0"] > .remind-form { margin: 0 20px 14px; }
+.fp .cw-head { display: flex; align-items: center; gap: 10px; padding: 14px 20px; border-bottom: 1px solid var(--k-line2); position: sticky; top: 0; background: var(--k-surface); z-index: 3; border-radius: 16px 16px 0 0; }
+.fp .cw-head b { font-size: 16px; } .fp .cw-file { color: var(--k-muted); font-size: 12.5px; }
+.fp .cw-sp { flex: 1; }
+.fp .cw-kbd { border: 1px solid var(--k-line); border-bottom-width: 2px; border-radius: 5px; padding: 0 5px; font: 11px/16px ui-monospace, monospace; color: var(--k-muted); background: var(--k-surface2); }
+.fp .cw-x { width: 30px; height: 30px; border-radius: 8px; border: 1px solid var(--k-line); background: var(--k-surface); color: var(--k-muted); font-size: 18px; line-height: 1; cursor: pointer; }
+.fp .cw-x:hover { color: var(--k-fg); border-color: var(--k-muted); }
+.fp .cw-err { margin: 10px 20px 0; padding: 8px 12px; border-radius: 9px; background: var(--k-stop-bg); color: var(--k-stop); font-size: 13px; }
+.fp .cw-err[hidden] { display: none; }
+.fp .cw-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; padding: 10px 20px; border-bottom: 1px solid var(--k-line2); font-size: 13px; }
+.fp .cw-lab { color: var(--k-muted); min-width: 52px; }
+.fp .cw-pw { position: relative; }
+.fp .cw-pw > summary { list-style: none; cursor: pointer; } .fp .cw-pw > summary::-webkit-details-marker { display: none; }
+.fp .cw-to-pick { display: inline-flex; align-items: center; gap: 6px; padding: 5px 14px; border-radius: 999px; background: var(--k-btn); color: var(--k-btn-fg); font-weight: 600; white-space: nowrap; }
+.fp .cw-people > summary { display: inline-flex; gap: 10px; align-items: baseline; color: var(--k-muted); }
+.fp .cw-pop { position: absolute; z-index: 6; top: calc(100% + 8px); inset-inline-start: 0; min-width: 320px; max-width: min(640px, 80vw); background: var(--k-surface);
+  border: 1px solid var(--k-line); border-radius: 12px; box-shadow: 0 16px 40px rgba(0, 0, 0, .2); padding: 12px 14px; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.fp .cw-pop .send-to { margin: 0; flex-direction: column; align-items: flex-start; }
+.fp .cw-pop-acts { flex-basis: 100%; display: flex; gap: 14px; font-size: 12.5px; padding-top: 4px; border-top: 1px solid var(--k-line2); }
+.fp .cw-pop-acts button.k-lnk { background: none; border: 0; padding: 0; font: inherit; cursor: pointer; }
+.fp .cw-reply { display: block; }
+.fp .cw-reply > summary { list-style: none; cursor: pointer; display: flex; gap: 10px; align-items: center; } .fp .cw-reply > summary::-webkit-details-marker { display: none; }
+.fp .cw-reply-sum { color: var(--k-fg); }
+.fp .cw-reply[open] > summary .cw-change { display: none; }
+.fp .cw-reply[hidden] { display: none; }
+.fp .cw-reply-body { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 10px; }
+.fp .cw-hint { flex-basis: 100%; color: var(--k-muted); font-size: 12px; }
+.fp .cw-tabs { display: flex; align-items: center; gap: 0; padding: 10px 20px 4px; }
+.fp .cw-tab { border: 1px solid var(--k-line); background: var(--k-surface); color: var(--k-muted); font: inherit; font-size: 12.5px; padding: 4px 14px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
+.fp .cw-tab:first-child { border-start-start-radius: 999px; border-end-start-radius: 999px; } .fp .cw-tab:nth-child(2) { border-start-end-radius: 999px; border-end-end-radius: 999px; border-inline-start: 0; }
+.fp .cw-tab.on { background: var(--k-fg); color: var(--k-bg); border-color: var(--k-fg); font-weight: 700; }
+.fp .cw-tr { font-style: normal; font-size: 11px; font-weight: 700; border-radius: 6px; padding: 0 6px; }
+.fp .cw-tr:empty { display: none; }
+.fp .cw-tr.ok { background: var(--k-ok-bg); color: var(--k-ok); } .fp .cw-tr.busy, .fp .cw-tr.stale { background: var(--k-warn-bg); color: var(--k-warn); }
+.fp .cw-keys { color: var(--k-muted); font-size: 12px; }
+.fp .cw-pane { padding: 4px 20px 0; }
+.fp .cw-pane[hidden] { display: none; }
+.fp .fp-write[data-folded="0"] .cw-pane textarea[name="body"] { min-height: 320px; border: 0; padding: 8px 2px; font-size: 15px; line-height: 1.7; resize: none; box-shadow: none; background: transparent; }
+.fp .fp-write[data-folded="0"] .cw-pane textarea[name="body"]:focus { outline: none; }
+.fp .cw-en #translation .translation { border: 0; box-shadow: none; padding: 6px 2px; background: transparent; max-height: none; }
+.fp .cw-en .translation-text { min-height: 300px; font-size: 15px; line-height: 1.7; }
+.fp .cw-en .cw-tr-send { display: none; }
+.fp .cw-en #translation.cw-stale { opacity: .55; }
+.fp .cw-en #translation:empty::before { content: "…"; color: var(--k-muted); }
+.fp .fp-write[data-folded="0"] .compose-foot { margin-top: auto; padding: 12px 20px; border-top: 1px solid var(--k-line2); background: var(--k-surface2); position: sticky; bottom: 0; z-index: 3; }
+.fp .fp-write[data-folded="0"] .reply-quote { margin: 10px 20px 0; }
+.fp .fp-write[data-folded="0"] .party-add[open], .fp .fp-write[data-folded="0"] .send-later[open] { margin: 10px 20px; }
+.fp [data-cw-preview], .fp .fp-write .reply-quote[hidden] { display: none !important; }
+.fp .cw-more-btn { font-size: 13px; color: var(--k-link); }
+.fp .cw-more .cw-pop { top: auto; bottom: calc(100% + 8px); flex-direction: column; align-items: flex-start; min-width: 240px; }
+.fp .cw-en .translation > .sec, .fp .cw-en .translation-original { display: none; }
+/* high importance (20 Oct) and a frozen file's line in the writing window */
+.fp .cw-imp { display: inline-flex; align-items: center; cursor: pointer; font-size: 12.5px; }
+.fp .cw-imp input { position: absolute; opacity: 0; width: 0; height: 0; }
+.fp .cw-imp span { border: 1px solid var(--k-line); border-radius: 999px; padding: 4px 11px; color: var(--k-muted); background: var(--k-surface); }
+.fp .cw-imp input:checked + span { background: var(--k-stop-bg); color: var(--k-stop); border-color: color-mix(in srgb, var(--k-stop) 45%, var(--k-line)); font-weight: 700; }
+.fp .cw-imp input:focus-visible + span { outline: 2px solid var(--k-btn); outline-offset: 1px; }
+.fp .cw-frozen { margin: 10px 20px 0; padding: 8px 12px; border-radius: 9px; background: var(--k-warn-bg); color: var(--k-warn); font-size: 13px; }
+.fp .cw-frozen[hidden] { display: none; }
+.fp .cw-frozen .k-lnk { background: none; border: 0; padding: 0; font: inherit; font-weight: 700; cursor: pointer; margin-inline-start: 6px; }
+.attach-icon { display: inline-flex; align-items: center; }
+.attach-icon svg { width: 13px; height: 13px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.from-file { position: relative; }
+.from-file > summary { list-style: none; cursor: pointer; }
+.from-file > summary::-webkit-details-marker { display: none; }
+.from-file[open] > summary { color: #2563eb; border-color: #bfdbfe; background: #eff6ff; }
+.from-file-list {
+  position: absolute; bottom: calc(100% + 8px); inset-inline-start: 0; z-index: 20;   /* the START side: in Hebrew the button is at the right edge, the list opens leftwards (21 Oct) */
+  width: 330px; max-width: min(330px, calc(100vw - 48px)); max-height: 280px; overflow-y: auto; padding: 6px;
+  background: #fff; border: 1px solid #e2e8f0; border-radius: 10px;
+  box-shadow: 0 10px 25px -5px rgba(15,23,42,.18);
+}
+.from-file-row {
+  display: flex; flex-direction: row; align-items: center; gap: 9px;
+  padding: 7px 8px; border-radius: 7px; cursor: pointer; color: #334155;
+}
+.from-file-row:hover { background: #f8fafc; }
+.from-file-row input { accent-color: #2563eb; width: 14px; height: 14px; flex: none; }
+.from-file-row:has(input:checked) { background: #eff6ff; }
+.from-file-main { min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+.from-file-main .doc-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.from-file-row .doc-ic { flex: none; width: 28px; height: 28px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 700; }
+.from-file.has > summary { color: #1d4ed8; background: #eff6ff; border-color: #bfdbfe; font-weight: 600; }
+
+/* sketch glue: the bits the page around the window gets from kupfer.css elsewhere */
+.fp{font-family:Heebo,Arial,sans-serif;color:var(--k-fg)}
+.fp .muted{color:var(--k-muted)} .fp .small{font-size:12px}
+.fp details>summary{list-style:none}.fp details>summary::-webkit-details-marker{display:none}
+.fp .ic{width:1em;height:1em;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.fp .doc-ic{background:var(--k-line2);color:var(--k-muted)}
+.fp .doc-sub{font-size:11.5px;color:var(--k-muted)}
+.fp .from-file-list{background:var(--k-surface);border-color:var(--k-line)}
+.fp .send-later{display:none}.fp .send-later[open]{display:block}
+.fp .sl-h{font-weight:700;margin-bottom:8px}.fp .sl-acts{display:flex;gap:8px;justify-content:flex-end;margin-top:10px}
+.fp .translation-text{width:100%;border:0;background:transparent;color:var(--k-fg);font:inherit;resize:none;direction:ltr;text-align:left}
+.fp .cw-en .sk-note{color:var(--k-muted);font-size:13px;padding:8px 2px}
+.conv .fp-write{flex:none}
+.fp .compose-foot .btn-small{padding:6px 12px}
+.shut-zone{margin-top:auto;padding:14px 4px 4px;border-top:1px dashed var(--line);display:flex;flex-direction:column;gap:3px;align-items:flex-start}
+.shut-btn{background:none;border:0;padding:0;color:#b91c1c;font-size:12.5px;text-decoration:underline;text-underline-offset:3px}
+.shut-btn:hover{color:#7f1d1d}
+html[data-theme=dark] .shut-btn{color:#fca5a5}
+.shut-zone span{font-size:11.5px;color:var(--muted)}
+.fcard h1{margin-bottom:6px}
+/* sketch controls */
+.sk{position:fixed;left:14px;bottom:14px;background:#0f172a;color:#e2e8f0;border-radius:12px;padding:8px 10px;font-size:12px;z-index:30;display:flex;gap:8px;align-items:center;box-shadow:0 8px 24px rgba(0,0,0,.3)}
+.sk b{color:var(--amber)}
+.sk label{display:flex;gap:4px;align-items:center;cursor:pointer}
+.sk .x{background:none;border:0;color:#94a3b8}
+.sk{top:7px;bottom:auto!important;left:50%;transform:translateX(-50%);padding:4px 10px;box-shadow:none;border:1px solid #334e7a}
+.toast{position:fixed;bottom:70px;left:50%;transform:translateX(-50%);background:#1e293b;color:#fff;border-radius:10px;padding:8px 14px;font-size:13px;z-index:50;display:none}
+@media (max-width:1200px){.wrap{grid-template-columns:230px minmax(0,1fr) 290px}.mh{grid-template-columns:24px 130px minmax(0,1fr) 88px 58px}}
+</style>
+</head>
+<body class="v-b">
+<div class="top">
+  <span class="brand"><i></i>Kupfer</span><span class="sub">תפעול · מופעל על ידי Poirot</span><span class="sub">· משלוחים</span>
+  <span class="sp"></span>
+  <span class="seg"><button class="on">כאן</button><button>לא כאן</button></span>
+  <span class="seg lang"><button class="on">עב</button><button>EN</button></span>
+  <button class="themebtn" id="theme" title="בהיר / כהה">מצב כהה</button>
+</div>
+
+<div class="wrap">
+  <!-- right: the open files -->
+  <aside class="panel files">
+    <h3><span>תיקים פתוחים · <b id="fcount">3</b></span><span style="color:#dc2626;font-weight:700;font-size:12px">1 צריך אותך</span></h3>
+    <input id="fsearch" type="search" placeholder="חיפוש תיקים — מזהה, לקוח, מסלול…">
+    <div class="fchips" id="fchips">
+      <button class="fchip on" data-f="all">הכל</button><button class="fchip" data-f="need">צריך אותך</button><button class="fchip" data-f="unread">לא נקראו</button><button class="fchip" data-f="air">אווירי</button><button class="fchip" data-f="sea">ימי</button>
+    </div>
+    <div class="flist" id="flist">
+      <div class="fi on" data-k="sea unread"><b>SHP-Q-2026-10-30-01<span class="dot"></span></b><span>Lotus Bay Trading · SEA FCL AUMEL → ILASH</span></div>
+      <div class="fi" data-k="air need"><b>SHP-2026-0007<span class="dot need"></span></b><span>Example Importers · AIR DOOR_TO_AIRPORT</span></div>
+      <div class="fi" data-k="sea"><b>SHP-2026-0009<span class="dot"></span></b><span>North Coast Supplies · SEA LCL CNSHA → ILHFA</span></div>
+    </div>
+    <span class="sp"></span>
+    <a class="lnk" href="#" style="text-align:right">← לארכיון</a>
+  </aside>
+
+  <!-- center: the conversation only -->
+  <section class="panel conv">
+    <div class="cbar">
+      <span class="ttl">השיחה</span>
+      <span id="filters">
+        <button class="chip on" data-cat="all">הכול <b>12</b></button>
+        <button class="chip" data-cat="fwd">סוכן <b>5</b></button>
+        <button class="chip" data-cat="cus">לקוח <b>4</b></button>
+        <button class="chip" data-cat="sys">מערכת <b>2</b></button>
+        <button class="chip" data-cat="note">פנימי <b>1</b></button>
+        <button class="chip" data-cat="unread">לא נקראו <b id="ucount">1</b></button>
+      </span>
+      <span class="sp"></span>
+      <button class="lnk" id="allread">סמן הכול כנקרא</button>
+      <button class="parties" id="partiesBtn">👥 4 משתתפים ▾
+        <div class="pop" id="parties">
+          <div><span class="role r-fwd">סוכן</span>Mei Lin · Danube Gate</div>
+          <div><span class="role r-cus">לקוח</span>Daniel Rosen · Lotus Bay Trading</div>
+          <div><span class="role r-sup">ספק</span>—</div>
+          <div><span class="role r-poi">Poirot</span>המערכת</div>
+          <div><span class="role r-me">אתה</span>עומר</div>
+        </div>
+      </button>
+      <button class="chip" id="density" title="שורות דחוסות / מרווחות">⇕</button>
+    </div>
+    <div class="needs" id="needs" hidden><b>צריך אותך:</b><span>הסוכן מבקש SI עד מחר 12:00 — עדיין לא נשלח</span><span class="sp"></span><button class="btn go">כתוב לסוכן</button><button class="btn">הזכר לי</button></div>
+    <div class="feed" id="feed"></div>
+    <div class="fp comp-host">
+    <div class="cw-dim" data-fold aria-hidden="true"></div>
+    <div class="fp-write col-write" id="write" data-folded="1">
+      <button type="button" class="comp-folded" data-unfold>
+        <span class="chip-to">אל: <span data-cw-to-label2>Forwarder · Danube Gate</span> ▾</span>
+        <span class="fake" data-cw-fake>כתוב אל Mei Lin…</span>
+        <span class="small muted">אנשי קשר ✎ · צירוף · תצוגה מקדימה · האפשרויות נפתחות עם התיבה</span>
+      </button>
+      <form class="compose" id="compose">
+        <div class="cw-head"><b>הודעה חדשה</b><span class="cw-file">SHP-Q-2026-10-30-01 · Lotus Bay Trading</span>
+          <span class="cw-sp"></span><kbd class="cw-kbd">Esc</kbd><button type="button" class="cw-x" data-fold title="סגור - מה שכתבת נשמר" aria-label="סגור - מה שכתבת נשמר">×</button></div>
+        <div class="cw-err" data-cw-err hidden></div>
+        <div class="cw-row cw-to-row">
+          <span class="cw-lab">אל:</span>
+          <details class="cw-pw cw-to">
+            <summary class="cw-to-pick"><span data-cw-to-label>Forwarder · Danube Gate</span> ▾</summary>
+            <div class="cw-pop targets">
+              <span class="pill-wrap"><label class="pill" title="mei.lin@danubegate.example"><input type="radio" name="target" data-label="Forwarder · Danube Gate" data-who="Mei Lin" value="FORWARDER" checked><span class="pill-dot"></span>Forwarder · Danube Gate</label><button type="button" class="pill-edit" title="Edit the contacts for Forwarder"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19 9a2.1 2.1 0 0 0-3-3L5 17v3Z"/></svg></button></span>
+              <span class="pill-wrap"><label class="pill" title="daniel@lotusbay.example"><input type="radio" name="target" data-label="Customer · Lotus Bay Trading" data-who="Daniel Rosen" value="CUSTOMER"><span class="pill-dot"></span>Customer · Lotus Bay Trading</label><button type="button" class="pill-edit" title="Edit the contacts for Customer"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19 9a2.1 2.1 0 0 0-3-3L5 17v3Z"/></svg></button></span>
+              <span class="pill-wrap"><label class="pill pill-unset" title="No address yet - click the pencil to add one"><input type="radio" name="target" data-label="Supplier" value="SUPPLIER" disabled><span class="pill-dot"></span>Supplier <span class="pill-note">להגדיר</span></label><button type="button" class="pill-edit" title="Edit the contacts for Supplier"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19 9a2.1 2.1 0 0 0-3-3L5 17v3Z"/></svg></button></span>
+              <button type="button" class="pill pill-add" title="הוסף גורם לתיק — משלח מקומי, עמיל מכס, מוביל">+ הוסף גורם</button>
+            </div>
+          </details>
+          <details class="cw-pw cw-people">
+            <summary><span class="cw-people-sum" data-cw-people-sum data-email="מייל" data-wa="וואטסאפ" data-nobody="אף אחד לא יקבל - סמן ערוץ"></span> <span class="k-lnk">ערוך אנשים</span></summary>
+            <div class="cw-pop">
+              <div class="send-to" data-send-to="FORWARDER">
+                <span class="muted small">שלח אל:</span>
+                <span class="sendto-person"><span class="sendto-name">Mei Lin</span>
+                  <label class="sendto-chip"><input type="checkbox" name="to" value="FORWARDER|0|email" checked> מייל</label>
+                  <span class="sendto-chip off" title="no phone for this person - add one with the pencil">וואטסאפ</span></span>
+                <span class="sendto-person"><span class="sendto-name">Ops desk</span>
+                  <label class="sendto-chip"><input type="checkbox" name="to" value="FORWARDER|1|email"> מייל</label>
+                  <span class="sendto-chip off" title="no phone for this person - add one with the pencil">וואטסאפ</span></span>
+              </div>
+              <div class="send-to" data-send-to="CUSTOMER" hidden>
+                <span class="muted small">שלח אל:</span>
+                <span class="small muted">daniel@lotusbay.example</span>
+              </div>
+              <div class="cw-pop-acts"><button type="button" class="k-lnk" data-cw-edit-party>✎ ערוך את הגורם</button></div>
+            </div>
+          </details>
+        </div>
+        <div id="reply-quote" class="reply-quote small" hidden><span class="muted">↩ replying to <b class="reply-who"></b>: "<span class="reply-text"></span>"</span> <button type="button" class="btn btn-small btn-quiet" id="reply-clear">×</button></div>
+        <details class="cw-row cw-reply reply-routing" id="reply-routing">
+          <summary><span class="cw-lab">בתשובה:</span><span class="cw-reply-sum" data-cw-reply-sum data-none="לא מעדכנים אף אחד נוסף" data-some="יעודכן גם: {who}" data-and=" ו"></span><span class="k-lnk cw-change">שנה</span></summary>
+          <div class="cw-reply-body">
+            <span class="routing-label"><span class="routing-arrow">↳</span> כשיענו, התשובה תעבור עריכה ותצא גם ל:</span>
+            <label class="route-toggle customer" data-party="CUSTOMER"><input type="checkbox" name="update_on_reply" value="CUSTOMER">לקוח</label>
+            <label class="route-toggle forwarder" data-party="FORWARDER"><input type="checkbox" name="update_on_reply" value="FORWARDER">משלח</label>
+            <label class="route-toggle supplier" data-party="SUPPLIER"><input type="checkbox" name="update_on_reply" value="SUPPLIER">ספק</label>
+            <div class="cw-hint">בלי סימון: התשובה נשארת בתיק ולא עוברת לאף אחד.</div>
+          </div>
+        </details>
+        <div class="cw-tabs" role="tablist">
+          <button type="button" class="cw-tab on" role="tab" data-cw-tab="write">מה שאתה כותב</button>
+          <button type="button" class="cw-tab" role="tab" data-cw-tab="english">English - כך זה ייצא <i class="cw-tr" data-cw-tr></i></button>
+          <span class="cw-sp"></span><span class="cw-keys">Ctrl+E מחליף</span>
+        </div>
+        <div class="cw-pane" data-cw-pane="write">
+          <textarea name="body" rows="1" dir="auto" data-autogrow placeholder="כתוב בכל שפה — זה יוצא באנגלית, ומה שהקלדת נשאר בתיק." required></textarea>
+        </div>
+        <div class="cw-pane cw-en" data-cw-pane="english" hidden><div id="translation"></div></div>
+        <div class="compose-foot">
+          <span class="foot-left">
+            <label class="attach-pick muted small"><span class="attach-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11.5 12.4 19a4.5 4.5 0 0 1-6.4-6.4l7.9-7.8a3 3 0 0 1 4.3 4.3l-7.9 7.8a1.5 1.5 0 0 1-2.1-2.1L15.6 7"/></svg></span><span class="attach-text">צירוף</span><input type="file" name="files" multiple onchange="var n=this.files.length;this.closest('.attach-pick').querySelector('.attach-text').textContent=n?(n+' file'+(n>1?'s':'')):'צירוף';this.closest('.attach-pick').classList.toggle('has',!!n)"></label>
+            <details class="from-file">
+              <summary class="attach-pick muted small" title="Send a document that is already on this file"><span class="attach-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7.5A1.5 1.5 0 0 1 4.5 6h4L10.5 8h9A1.5 1.5 0 0 1 21 9.5v8A1.5 1.5 0 0 1 19.5 19h-15A1.5 1.5 0 0 1 3 17.5Z"/></svg></span><span class="from-file-text">מהתיק</span></summary>
+              <div class="from-file-list">
+                <label class="from-file-row"><input type="checkbox" name="attach" value="d1"><span class="doc-ic">PDF</span><span class="from-file-main"><span class="doc-name">BKG-confirmation.pdf</span><span class="doc-sub">from Danube Gate</span></span></label>
+                <label class="from-file-row"><input type="checkbox" name="attach" value="d2"><span class="doc-ic">PDF</span><span class="from-file-main"><span class="doc-name">SI.pdf</span><span class="doc-sub">from you</span></span></label>
+                <label class="from-file-row"><input type="checkbox" name="attach" value="d3"><span class="doc-ic">PDF</span><span class="from-file-main"><span class="doc-name">CI-4471.pdf</span><span class="doc-sub">from you · the customer sees it</span></span></label>
+              </div>
+            </details>
+            <details class="cw-pw cw-more"><summary class="cw-more-btn">⋯ עוד</summary>
+              <div class="cw-pop cw-menu">
+                <label class="muted small inline-field"><input type="checkbox" name="hold" value="1" style="width:auto"> השהיית בדיקות</label>
+                <label class="muted small inline-field"><input type="checkbox" name="as_written" value="1" style="width:auto"> כפי שנכתב</label>
+                <button type="button" class="remind-btn muted small" data-remind><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 8 3 8H3s3-1 3-8Z"/><path d="M10 20a2 2 0 0 0 4 0"/></svg>תזכיר לי</button>
+              </div></details>
+          </span>
+          <label class="cw-imp" title="סמן כחשיבות גבוהה - המייל יגיד את זה להם, והשיחה לך"><input type="checkbox" name="important" value="1"><span>❗ חשוב</span></label>
+          <span class="actions">
+            <span class="send-split"><button class="btn btn-primary btn-small" type="submit">שליחה<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 3 3 10.5l7.5 3L13.5 21 21 3Z"/><path d="M10.5 13.5 21 3"/></svg></button><button type="button" class="btn btn-primary btn-small send-later-btn" title="שליחה מאוחרת - לבחור שעה" onclick="var d=document.getElementById('send-later');if(d)d.open=!d.open;"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>▾</button></span>
+          </span>
+        </div>
+        <details id="send-later" class="send-later">
+          <summary hidden></summary>
+          <div class="sl-h">שליחה מאוחרת</div>
+          <div class="sl-pick">
+            <label><input type="radio" name="later" value="1h"> בעוד שעה</label>
+            <label><input type="radio" name="later" value="3h"> בעוד 3 שעות</label>
+            <label><input type="radio" name="later" value="tomorrow06" checked> מחר 06:00</label>
+            <label><input type="radio" name="later" value="at"> ב־ <input type="datetime-local" name="later_at"></label>
+          </div>
+          <p class="sl-note">המילים שלך, כמו שהיו יוצאות עכשיו (האנגלית שראית בתצוגה המקדימה). יוצא גם כשאין אוטונומיה - זה שלך. אם התיק הוקפא או שהם כתבו בתיק לפני כן - זה מחכה לך במקום לצאת.</p>
+          <div class="sl-acts"><button type="button" class="btn btn-small btn-quiet" onclick="this.closest('details').open=false">ביטול</button><button type="button" class="btn btn-primary btn-small" data-schedule>תזמון</button></div>
+        </details>
+      </form>
+    </div>
+    </div>
+  </section>
+
+  <!-- left: the file -->
+  <aside class="side">
+    <div class="panel fcard">
+      <h1><button class="pen" title="שינוי שם">✎</button>SHP-Q-2026-10-30-01</h1>
+      <div class="pills"><span class="pill">פעיל</span><span class="ok" title="שום דבר לא מחכה לך בתיק הזה">✓ הכול נקי</span><button class="ub" id="unreadChip">1 לא נקרא</button></div>
+      <div class="fbtns" style="margin-top:0"><button class="btn" id="sumBtn">סיכום משלוח</button></div>
+      <div class="tiles only-b" id="tilesB">
+        <div class="cap"><span>לבד</span><button class="lnk2" data-open="checks">פתח</button></div>
+        <button class="tile" data-open="checks" data-w="checkin"><span>הבדיקה הבאה</span><b data-v="checkin" data-s></b></button>
+        <button class="tile" data-open="checks" data-w="carrier"><span>מעקב מוביל</span><b data-v="carrier" data-s></b></button>
+        <button class="tile" data-open="auto" data-w="auto"><span>אוטונומיה</span><b data-v="auto" data-s></b></button>
+        <div class="cap"><span>התיק</span><button class="lnk2" data-open="all">פתח</button></div>
+        <button class="tile w3" data-open="all" data-w="req"><span>דרישות</span><b data-v="req" data-s></b></button>
+        <button class="tile w3" data-open="all" data-w="docs"><span>מסמכים</span><b data-v="docs" data-s></b></button>
+        <button class="tile w3" data-open="all" data-w="people"><span>אנשים</span><b data-v="people" data-s></b></button>
+        <button class="tile w3" data-open="all" data-w="prices"><span>מחירים</span><b data-v="prices" data-s></b></button>
+      </div>
+    </div>
+    <div class="panel box">
+      <h3>מועדים</h3>
+      <div class="dates"><div><span>איסוף ✎</span>Mon 03 Nov<br><small style="color:var(--muted)">מהספק · 24 Oct</small></div><div><span>מחסן ✎</span>לא ידוע</div><div><span>ETD ✎</span>Sun 02 Nov</div><div><span>ETA ✎</span>אחרי ה-ETD</div></div>
+    </div>
+    <div class="panel box">
+      <h3>עמוד לקוח</h3>
+      <div style="font-size:13px"><b>המשלוח שלך ממלבורן לאשדוד</b> <span class="ok">✓ התיק נפתח</span></div>
+      <div class="fbtns"><button class="btn">פתיחה ↗</button><button class="btn">העתק קישור</button></div>
+    </div>
+    <div class="shut-zone"><button class="shut-btn" id="closeBtn">סגירת תיק…</button><span>תיק סגור לא שולח יותר כלום. אפשר לפתוח אותו מחדש.</span></div>
+  </aside>
+</div>
+
+
+<div class="drawer" id="drawer">
+  <div class="dr-h"><b>מצב התיק</b><button class="dr-tab" data-tab="checks">לבד</button><button class="dr-tab" data-tab="auto">אוטונומיה</button><button class="dr-tab" data-tab="all">התיק</button><span class="sp" style="flex:1"></span><button class="dr-x" id="drX" title="סגור">✕</button></div>
+  <div class="dr-b" data-pane="checks">
+    <div class="dr-sec"><h4>הבדיקה הבאה <button class="btn" id="pauseBtn"></button></h4>
+      <p id="checkTxt"></p><p class="m">Poirot שולח תזכורת אחת בכל פעם, ומחכה לתשובה לפני הבאה.</p></div>
+    <div class="dr-sec"><h4>מעקב מוביל <span class="m">Alpha Line · ALPU1234567</span></h4>
+      <div id="carrierBox"></div></div>
+    <div class="dr-sec"><h4>מה Poirot ישלח</h4>
+      <div class="task">31 Oct 10:48 · תזכורת לסוכן: VGM</div>
+      <div class="task">02 Nov 09:00 · עדכון ללקוח: יצא מהנמל</div></div>
+  </div>
+  <div class="dr-b" data-pane="auto" hidden>
+    <div class="dr-sec"><h4>אוטונומיה <span class="segm" id="autoSeg"><button data-m="full">מלא</button><button data-m="part">חלקי</button><button data-m="man">ידני</button></span></h4>
+      <p class="m" id="autoTxt"></p>
+      <div id="tasks"></div></div>
+  </div>
+  <div class="dr-b" data-pane="all" hidden>
+    <div class="dr-sec"><h4>דרישות <span class="m" data-v="req"></span></h4><div id="reqList"></div><p class="m">לחיצה על שורה מסמנת אותה (בסקיצה).</p></div>
+    <div class="dr-sec"><h4>מסמכים</h4><div id="docList"></div></div>
+    <div class="dr-sec"><h4>אנשים</h4>
+      <div class="task"><span class="role r-cus">לקוח</span>Lotus Bay Trading · Daniel Rosen</div>
+      <div class="task"><span class="role r-fwd">סוכן</span>Danube Gate · Mei Lin</div>
+      <div class="task"><span class="role r-sup">ספק</span><span class="m">לא הוגדר</span></div></div>
+    <div class="dr-sec"><h4>מחירים <button class="btn" id="priceBtn">הצג</button></h4>
+      <p class="m" id="priceTxt">12 שורות · מוסתר</p></div>
+  </div>
+</div>
+
+<div class="dim" id="dim"></div>
+<div class="modal" id="summary"><h2>סיכום משלוח · SHP-Q-2026-10-30-01</h2>
+  <table><tr><td>לקוח</td><td>Lotus Bay Trading</td></tr><tr><td>מסלול</td><td dir="ltr" style="text-align:right">AUMEL → ILASH · FCL 1x40DV · FOB</td></tr><tr><td>אסמכתא</td><td dir="ltr" style="text-align:right">ALPU1234567 ✎</td></tr><tr><td>סוכן</td><td>Danube Gate · Mei Lin</td></tr><tr><td>חברת ספנות</td><td>Alpha Line · ETD 02 Nov</td></tr><tr><td>שלב</td><td>נפתח · מחכים לאיסוף</td></tr></table>
+  <div class="fbtns" style="justify-content:flex-start"><button class="btn" data-close>סגור</button></div></div>
+<div class="modal" id="closing"><h2>לסגור את התיק?</h2><p>תיק סגור לא שולח יותר כלום. אפשר לפתוח אותו מחדש.</p>
+  <div class="fbtns" style="justify-content:flex-start"><button class="btn go" data-close>סגור תיק</button><button class="btn" data-close>לא עכשיו</button></div></div>
+<div class="toast" id="toast"></div>
+
+<div class="sk" id="sk"><b>סקיצה B · מלאה</b>
+  <label><input type="checkbox" id="needsToggle"> הצג "צריך אותך"</label>
+  <button class="x" onclick="this.parentNode.remove()" title="הסתר">✕</button></div>
+
+<script>
+const MSGS = [
+ {d:"in",c:"fwd",who:"Danube Gate",sub:"סוכן · Mei Lin",subj:"RE: Booking confirmation",sn:"Booking confirmed on Alpha Line, ETD 02 Nov, cut-off 31 Oct 12:00.",tm:"30 Oct 09:12",day:"היום · יום חמישי, 30 באוקטובר",st:["s-new","חדש"],unread:true,att:["BKG-confirmation.pdf"],
+  body:"Hi Omer,\n\nBooking confirmed on Alpha Line, ETD 02 Nov, cut-off 31 Oct 12:00.\nPlease send the shipping instructions and the VGM by tomorrow 12:00.\n\nBest regards,\nMei Lin\nDanube Gate"},
+ {d:"out",c:"fwd",who:"Danube Gate",sub:"אל סוכן",subj:"Shipping instructions",sn:"Hi Mei, attached the SI and the commercial invoice. Please confirm the VGM by tomorrow.",tm:"29 Oct 16:40",day:"אתמול · יום רביעי, 29 באוקטובר",st:["s-sent","נשלח"],att:["SI.pdf","CI-4471.pdf"],
+  body:"Hi Mei,\n\nAttached the SI and the commercial invoice.\nPlease confirm the VGM by tomorrow.\n\nOmer Kupfer"},
+ {sys:true,day:"אתמול · יום רביעי, 29 באוקטובר",txt:"Poirot שלח תזכורת לסוכן ובדק את מצב הבוקינג",tm:"29 Oct 10:48",lst:["10:48 · נשלחה תזכורת לסוכן: Was the cargo collected?","10:48 · נבדק מצב הבוקינג אצל חברת הספנות – עדיין לא אושר"]},
+ {d:"in",c:"cus",who:"Lotus Bay Trading",sub:"לקוח · Daniel Rosen",subj:"RE: Pick-up date",sn:"The goods are ready from Monday, our warehouse is open 08:00-16:00.",tm:"28 Oct 14:05",day:"יום שלישי, 28 באוקטובר",st:["s-read","נקרא"],
+  body:"Hi Omer,\n\nThe goods are ready from Monday, our warehouse is open 08:00-16:00.\nGate 3, ask for Tom.\n\nThanks,\nDaniel"},
+ {d:"out",c:"cus",who:"Lotus Bay Trading",sub:"אל לקוח",subj:"Pick-up date",sn:"Dear Daniel, please confirm the cargo ready date and the warehouse hours.",tm:"28 Oct 11:20",day:"יום שלישי, 28 באוקטובר",st:["s-sent","נשלח"],
+  body:"Dear Daniel,\n\nPlease confirm the cargo ready date and the warehouse hours.\n\nOmer Kupfer"},
+ {d:"note",c:"note",who:"עומר",sub:"הערה פנימית",subj:"התקשרתי לסוכן",sn:"הובטח לי אישור בוקינג עד מחר בצהריים. לבדוק שוב ב-14:00.",tm:"27 Oct 17:30",day:"יום שני, 27 באוקטובר",st:["s-int","פנימי"],he:true,
+  body:"הובטח לי אישור בוקינג עד מחר בצהריים.\nלבדוק שוב ב-14:00 אם לא הגיע."},
+ {d:"in",c:"fwd",who:"Danube Gate",sub:"סוכן · Mei Lin",subj:"RE: Rate & space",sn:"Space is available on the 02 Nov sailing, rate as quoted. Shall we proceed?",tm:"27 Oct 09:02",day:"יום שני, 27 באוקטובר",st:["s-read","נקרא"],
+  body:"Hi Omer,\n\nSpace is available on the 02 Nov sailing, rate as quoted.\nShall we proceed with the booking?\n\nMei"},
+ {d:"out",c:"fwd",who:"Danube Gate",sub:"אל סוכן",subj:"Rate & space 1x40DV",sn:"Please check space for 1x40DV, FOB Melbourne, cargo ready 03 Nov.",tm:"26 Oct 15:12",day:"יום ראשון, 26 באוקטובר",st:["s-sent","נשלח"],
+  body:"Hi Mei,\n\nPlease check space for 1x40DV, FOB Melbourne, cargo ready 03 Nov.\n\nOmer Kupfer"},
+ {d:"out",c:"cus",who:"Lotus Bay Trading",sub:"אל לקוח",subj:"Quote accepted - next steps",sn:"Thank you for approving the quote. We start the booking with the carrier now.",tm:"26 Oct 12:00",day:"יום ראשון, 26 באוקטובר",st:["s-sent","נשלח"],
+  body:"Dear Daniel,\n\nThank you for approving the quote. We start the booking with the carrier now\nand will update you on the pick-up date.\n\nOmer Kupfer"},
+ {d:"in",c:"cus",who:"Lotus Bay Trading",sub:"לקוח · Daniel Rosen",subj:"Quote approved",sn:"We approve the quote Q-2026-10-22-03. Please go ahead.",tm:"25 Oct 18:44",day:"שבת, 25 באוקטובר",st:["s-read","נקרא"],
+  body:"Hi Omer,\n\nWe approve the quote Q-2026-10-22-03. Please go ahead.\n\nDaniel"},
+ {sys:true,day:"שבת, 25 באוקטובר",txt:"התיק נפתח מההצעה Q-2026-10-22-03 · FCL 1x40DV",tm:"25 Oct 18:45",lst:["18:45 · התיק נפתח מההצעה Q-2026-10-22-03","18:45 · נקבעה תזכורת יומית לסוכן ב-10:48"]},
+ {d:"in",c:"fwd",who:"Danube Gate",sub:"סוכן · Mei Lin",subj:"Quote DG-2001",sn:"Please find our rates for 1x40DV Melbourne - Ashdod, valid till 20 Nov.",tm:"22 Oct 08:31",day:"יום רביעי, 22 באוקטובר",st:["s-read","נקרא"],att:["DG-2001.pdf"],
+  body:"Hi Omer,\n\nPlease find our rates for 1x40DV Melbourne - Ashdod, valid till 20 Nov.\n\nMei"},
+];
+const ARR = {in:"↓", out:"↑", note:"✎"};
+let cat = "all", openIdx = 0;
+const feed = document.getElementById("feed");
+function esc(s){const d=document.createElement("div");d.textContent=s;return d.innerHTML;}
+function render(){
+  let html = "", lastDay = null, shown = 0;
+  MSGS.forEach((m, i) => {
+    const show = cat === "all" ? true : cat === "unread" ? !!m.unread : cat === "sys" ? !!m.sys : m.c === cat;
+    if (!show) return;
+    shown++;
+    if (m.day !== lastDay) { html += `<div class="day">${esc(m.day)}</div>`; lastDay = m.day; }
+    if (m.sys) {
+      html += `<div class="sys" data-i="${i}"><span>⚙ <b>${esc(m.txt)}</b> · ${esc(m.tm)} · <span style="color:var(--blue)">מה בדיוק ▸</span></span><div class="lst">${m.lst.map(esc).join("<br>")}</div></div>`;
+      return;
+    }
+    html += `<div class="msg ${m.unread?'unread':''} ${openIdx===i?'open':''}" data-i="${i}">
+      <div class="mh"><span class="dir d-${m.d}">${ARR[m.d]}</span><span class="who">${esc(m.who)}<small>${esc(m.sub)}</small></span>
+      <span class="sn ${m.he?'he':''}"><b>${esc(m.subj)}</b> — ${esc(m.sn)}</span><span class="tm">${esc(m.tm)}</span><span class="st ${m.st[0]}">${esc(m.st[1])}</span></div>
+      <div class="mb"><div class="meta">${m.d==="out"?"עומר → "+esc(m.who):m.d==="note"?"הערה פנימית · לא נשלחת":esc(m.who)+" → עומר"} · ${esc(m.tm)}</div>
+      <div class="txt ${m.he?'he':''}">${esc(m.body)}</div>
+      <div class="acts">${m.d!=="note"?'<button class="btn" data-reply="'+i+'">↩ השב</button><button class="btn">↪ העבר</button>':''}${(m.att||[]).map(a=>'<span class="att">📎 '+esc(a)+'</span>').join("")}<span class="sp"></span><button class="lnk" data-collapse>קפל ▴</button></div></div></div>`;
+  });
+  feed.innerHTML = html || '<div class="empty">אין הודעות בסינון הזה.</div>';
+  const u = MSGS.filter(m => m.unread).length;
+  document.getElementById("ucount").textContent = u;
+  const chip = document.getElementById("unreadChip");
+  chip.hidden = !u; chip.textContent = u + " לא נקרא";
+}
+feed.addEventListener("click", e => {
+  const sys = e.target.closest(".sys"); if (sys) { sys.classList.toggle("open"); return; }
+  const rep = e.target.closest("[data-reply]");
+  if (rep) { const m = MSGS[+rep.dataset.reply]; openCompose(m.c, null, +rep.dataset.reply); return; }
+  if (e.target.closest("[data-collapse]")) { openIdx = -1; render(); return; }
+  const msg = e.target.closest(".msg"); if (!msg || e.target.closest(".mb")) return;
+  const i = +msg.dataset.i;
+  openIdx = openIdx === i ? -1 : i;
+  if (MSGS[i].unread) { MSGS[i].unread = false; MSGS[i].st = ["s-read", "נקרא"]; }
+  render();
+});
+document.getElementById("filters").addEventListener("click", e => {
+  const b = e.target.closest(".chip"); if (!b) return;
+  cat = b.dataset.cat;
+  document.querySelectorAll("#filters .chip").forEach(x => x.classList.toggle("on", x === b));
+  render();
+});
+document.getElementById("unreadChip").onclick = () => document.querySelector('#filters [data-cat="unread"]').click();
+document.getElementById("allread").onclick = () => { MSGS.forEach(m => { if (m.unread) { m.unread = false; m.st = ["s-read", "נקרא"]; } }); render(); toast("כל ההודעות סומנו כנקראו"); };
+const pb = document.getElementById("partiesBtn"), pop = document.getElementById("parties");
+pb.onclick = e => { e.stopPropagation(); pop.classList.toggle("open"); };
+document.addEventListener("click", e => { if (!pb.contains(e.target)) pop.classList.remove("open"); });
+document.getElementById("density").onclick = function(){ document.body.classList.toggle("roomy"); this.classList.toggle("on", document.body.classList.contains("roomy")); };
+// THE WRITING WINDOW - the behaviour of console.js (fold/unfold, To, people, on-reply, tabs, Ctrl+E, Esc)
+const W = () => document.getElementById("write"), F = () => document.getElementById("compose");
+const BODY = () => F().querySelector('textarea[name="body"]');
+function isOpen(){ return W().getAttribute("data-folded") === "0"; }
+function closePops(except){ document.querySelectorAll("#compose .cw-pw[open], #compose .from-file[open]").forEach(d => { if (d !== except) d.open = false; }); }
+function unfold(){ W().setAttribute("data-folded", "0"); BODY().focus(); }
+function fold(){ W().setAttribute("data-folded", "1"); closePops(); }
+function picked(){ return F().querySelector('input[name="target"]:checked'); }
+function toLabel(){ const t = picked(); F().querySelector("[data-cw-to-label]").textContent = t.dataset.label;
+  document.querySelector("[data-cw-to-label2]").textContent = t.dataset.label;
+  document.querySelector("[data-cw-fake]").textContent = "כתוב אל " + t.dataset.who + "…";
+  F().querySelectorAll("[data-send-to]").forEach(b => b.hidden = b.dataset.sendTo !== t.value);
+  F().querySelectorAll(".route-toggle").forEach(r => r.hidden = r.dataset.party === t.value); }
+function people(){
+  const out = F().querySelector("[data-cw-people-sum]"), block = F().querySelector("[data-send-to]:not([hidden])");
+  if (!block) { out.textContent = ""; return; }
+  const names = [];
+  block.querySelectorAll(".sendto-person").forEach(p => { const on = [];
+    p.querySelectorAll('input[name="to"]:checked').forEach(i => on.push(i.value.split("|")[2] === "email" ? out.dataset.email : out.dataset.wa));
+    if (on.length) names.push(p.querySelector(".sendto-name").textContent.trim() + " (" + on.join(" + ") + ")"); });
+  if (block.querySelector(".sendto-person")) out.textContent = names.length ? names.join(", ") : out.dataset.nobody;
+  else { const m = block.querySelectorAll(".small.muted"); out.textContent = m.length ? m[m.length-1].textContent.trim() : ""; }
+}
+function replySum(){
+  const bar = document.getElementById("reply-routing"), out = bar.querySelector("[data-cw-reply-sum]"), who = [];
+  bar.querySelectorAll(".route-toggle").forEach(t => { const i = t.querySelector("input"); if (!t.hidden && i.checked) who.push(t.textContent.trim()); });
+  out.textContent = who.length ? out.dataset.some.replace("{who}", who.join(out.dataset.and)) : out.dataset.none;
+}
+let trFor = null;
+function trState(busy){ const i = F().querySelector("[data-cw-tr]"), b = BODY().value.trim();
+  const ok = trFor !== null && trFor === b && b, has = trFor !== null;
+  i.className = "cw-tr" + (busy ? " busy" : ok ? " ok" : has ? " stale" : ""); i.textContent = busy ? "…" : ok ? "✓" : has ? "↻" : ""; }
+function translate(){
+  const b = BODY().value.trim(), tr = document.getElementById("translation");
+  if (!b) { tr.innerHTML = ""; trFor = null; trState(); return; }
+  trState(true);
+  setTimeout(() => {
+    const latin = !/[֐-׿؀-ۿ]/.test(b);
+    tr.innerHTML = latin ? '<textarea class="translation-text" rows="10"></textarea>'
+      : '<div class="sk-note">בסקיצה אין תרגום אמיתי. במערכת מופיעה כאן האנגלית שתצא, ואפשר לתקן אותה לפני השליחה.</div>';
+    if (latin) tr.querySelector("textarea").value = b;
+    trFor = b; trState();
+  }, 450);
+}
+function show(which){
+  F().querySelectorAll("[data-cw-tab]").forEach(b => b.classList.toggle("on", b.dataset.cwTab === which));
+  F().querySelectorAll("[data-cw-pane]").forEach(p => p.hidden = p.dataset.cwPane !== which);
+  if (which === "english" && trFor !== BODY().value.trim()) translate();
+  if (which === "write") BODY().focus();
+}
+function tab(){ const on = F().querySelector("[data-cw-tab].on"); return on ? on.dataset.cwTab : "write"; }
+function reset(){ BODY().value = ""; grow(); F().querySelector('input[name="important"]').checked = false; F().querySelector('input[name="as_written"]').checked = false;
+  F().querySelectorAll('input[name="attach"]').forEach(x => x.checked = false); document.getElementById("send-later").open = false;
+  document.getElementById("reply-quote").hidden = true; trFor = null; trState(); show("write"); fold(); }
+function grow(){ const t = BODY(); }
+// a reply from the conversation: the party of that message, the quote line
+function openCompose(to, subj, i){
+  const key = to === "cus" ? "CUSTOMER" : "FORWARDER", r = F().querySelector('input[name="target"][value="' + key + '"]');
+  if (r) { r.checked = true; toLabel(); people(); replySum(); }
+  if (i != null) { const m = MSGS[i], q = document.getElementById("reply-quote");
+    q.querySelector(".reply-who").textContent = m.who; q.querySelector(".reply-text").textContent = m.sn.slice(0, 60) + (m.sn.length > 60 ? "…" : ""); q.hidden = false; }
+  unfold();
+}
+document.getElementById("reply-clear").onclick = () => document.getElementById("reply-quote").hidden = true;
+document.addEventListener("click", e => {
+  if (e.target.closest("[data-unfold]")) { unfold(); return; }
+  if (e.target.closest("[data-fold]")) { fold(); return; }
+  const inside = e.target.closest(".cw-pw, .from-file");
+  if (!e.target.closest("#compose")) { if (!inside) closePops(); return; }
+  closePops(inside);
+  const tb = e.target.closest("[data-cw-tab]"); if (tb) { show(tb.dataset.cwTab); return; }
+  if (e.target.closest(".pill-edit, [data-cw-edit-party], .pill-add")) { closePops(); toast("כאן נפתח טופס הגורם ואנשי הקשר – כמו היום"); }
+  if (e.target.closest("[data-remind]")) { closePops(); toast("כאן נפתח טופס התזכורת – כמו היום"); }
+  if (e.target.closest("[data-schedule]")) { if (!BODY().value.trim()) { BODY().reportValidity(); return; }
+    const l = F().querySelector('input[name="later"]:checked').closest("label").textContent.trim(); reset(); toast("תוזמן: " + l); }
+});
+document.addEventListener("change", e => {
+  if (!e.target.closest || !e.target.closest("#compose")) return;
+  if (e.target.name === "target") { toLabel(); closePops(); people(); replySum(); }
+  if (e.target.name === "to") people();
+  if (e.target.name === "update_on_reply") replySum();
+});
+document.addEventListener("input", e => { if (e.target === BODY()) trState(); });
+document.addEventListener("keydown", e => {
+  if (!isOpen()) return;
+  if ((e.ctrlKey || e.metaKey) && (e.key === "e" || e.key === "E" || e.key === "י")) { e.preventDefault(); show(tab() === "english" ? "write" : "english"); return; }
+  if (e.key !== "Escape") return;
+  if (document.querySelector("#compose .cw-pw[open]")) { closePops(); return; }
+  fold();
+});
+F().addEventListener("submit", e => {
+  e.preventDefault();
+  const t = picked(), b = BODY().value.trim(), imp = F().querySelector('input[name="important"]').checked;
+  const att = [...F().querySelectorAll('input[name="attach"]:checked')].map(x => x.closest("label").querySelector(".doc-name").textContent);
+  const cus = t.value === "CUSTOMER";
+  MSGS.unshift({d:"out", c: cus ? "cus" : "fwd", who: cus ? "Lotus Bay Trading" : "Danube Gate", sub: cus ? "אל לקוח" : "אל סוכן",
+    subj: (imp ? "❗ " : "") + "SHP-Q-2026-10-30-01", sn: b.replace(/\n/g, " "), tm: "30 Oct " + new Date().toTimeString().slice(0,5),
+    day: "היום · יום חמישי, 30 באוקטובר", st: ["s-sent","נשלח"], body: b, att, he: /[֐-׿]/.test(b)});
+  openIdx = -1; reset(); render(); feed.scrollTop = 0; toast("נשלח ✓");
+});
+toLabel(); people(); replySum(); trState();
+// files list
+function filterFiles(){
+  const q = document.getElementById("fsearch").value.toLowerCase(), f = document.querySelector("#fchips .on").dataset.f;
+  let n = 0;
+  document.querySelectorAll("#flist .fi").forEach(el => { const ok = (f === "all" || el.dataset.k.includes(f)) && el.textContent.toLowerCase().includes(q); el.hidden = !ok; n += ok; });
+  document.getElementById("fcount").textContent = n;
+}
+document.getElementById("fsearch").oninput = filterFiles;
+document.getElementById("fchips").onclick = e => { const b = e.target.closest(".fchip"); if (!b) return; document.querySelectorAll("#fchips .fchip").forEach(x => x.classList.toggle("on", x === b)); filterFiles(); };
+document.getElementById("flist").onclick = e => { const el = e.target.closest(".fi"); if (!el) return; document.querySelectorAll(".fi").forEach(x => x.classList.toggle("on", x === el)); toast("בסקיצה רק התיק הזה מלא"); };
+// the file's card
+const dim = document.getElementById("dim");
+function modal(id){ dim.classList.add("open"); document.getElementById(id).classList.add("open"); }
+function shut(){ dim.classList.remove("open"); document.querySelectorAll(".modal").forEach(m => m.classList.remove("open")); }
+document.getElementById("sumBtn").onclick = () => modal("summary");
+document.getElementById("closeBtn").onclick = () => modal("closing");
+dim.onclick = shut; document.querySelectorAll("[data-close]").forEach(b => b.onclick = shut);
+document.getElementById("needsToggle").onchange = e => { document.getElementById("needs").hidden = !e.target.checked; };
+document.getElementById("theme").onclick = () => { const r = document.documentElement; r.dataset.theme = r.dataset.theme === "dark" ? "light" : "dark"; document.getElementById("theme").textContent = r.dataset.theme === "dark" ? "מצב בהיר" : "מצב כהה"; };
+let tt; function toast(t){ const el = document.getElementById("toast"); el.textContent = t; el.style.display = "block"; clearTimeout(tt); tt = setTimeout(() => el.style.display = "none", 1800); }
+// ===== the file's status: one state, painted in A, B and C =====
+const ST = {paused:false, carrier:true, mode:"full", tasks:[true,true,true,true], prices:false,
+  req:[["הצעה אושרה על ידי הלקוח","done"],["בקשת מקום לסוכן","done"],["SI נשלח לסוכן","done"],["VGM מהספק","miss"],["רשימת אריזה","miss"],["טיוטת B/L","wait"],["תעודת מקור","wait"],["הודעת הגעה","wait"],["שחרור מהמכס","wait"]],
+  docs:[["BKG-confirmation.pdf",true],["SI.pdf",false],["CI-4471.pdf",false]]};
+const TASKS = ["תזכורות לסוכן","עדכון ללקוח על כל שלב","בקשת מסמכים חסרים","בדיקת המוביל"];
+function vals(){
+  const u = MSGS.filter(m => m.unread).length;
+  const d = ST.req.filter(r => r[1]==="done").length, m = ST.req.filter(r => r[1]==="miss").length, n = ST.req.length;
+  const nw = ST.docs.filter(x => x[1]).length, t = ST.tasks.filter(Boolean).length;
+  const W = x => '<span class="warn">'+x+'</span>';
+  return {
+    checkin: {l: ST.paused ? W("מושהה") : "פעיל", s: ST.paused ? "מושהה" : "פעיל", w: ST.paused},
+    carrier: {l: ST.carrier ? "1 לבדיקה" : "תקין", s: ST.carrier ? "1 לבדיקה" : "תקין", w: ST.carrier},
+    auto: {l: ST.mode==="full" ? "מלא · כל הרשימה יוצאת לבד" : ST.mode==="part" ? `חלקי · ${t} מתוך ${TASKS.length} משימות` : "ידני · שום דבר לא יוצא לבד",
+           s: ST.mode==="full" ? "מלא" : ST.mode==="part" ? `חלקי ${t}/${TASKS.length}` : "ידני", w:false},
+    unread: {l: u ? '<span style="color:var(--blue);font-weight:700">'+u+'</span>' : "ללא", s: u ? u+"" : "ללא", w:false},
+    req: {l: `${d} מתוך ${n}` + (m ? " · " + W(m+" חסרים") : ""), s: `${d}/${n}` + (m ? ` · ${m} חסרים` : ""), w: m>0},
+    docs: {l: ST.docs.length + (nw ? " · " + W(nw+" חדש") : " · " + ST.docs[0][0]), s: ST.docs.length + (nw ? ` · ${nw} חדש` : " מסמכים"), w: nw>0},
+    people: {l: "Lotus Bay Trading · Danube Gate", s: "לקוח + סוכן", w:false},
+    prices: {l: "12 שורות · " + (ST.prices ? "מוצג" : "מוסתר"), s: "12 שורות", w:false},
+  };
+}
+function paint(){
+  const V = vals();
+  document.querySelectorAll("[data-v]").forEach(el => { const v = V[el.dataset.v]; if (!v) return;
+    if (el.hasAttribute("data-s")) el.textContent = v.s; else el.innerHTML = v.l;
+    if (el.hasAttribute("data-chip")) el.classList.toggle("chipv", v.w); });
+  document.querySelectorAll("[data-w]").forEach(el => el.classList.toggle("is-warn", !!V[el.dataset.w].w));
+  // drawer bodies
+  document.getElementById("pauseBtn").textContent = ST.paused ? "חדש" : "השהה";
+  document.getElementById("checkTxt").innerHTML = ST.paused ? '<span class="warn">מושהה</span> · Poirot לא ישלח תזכורות עד שתחדש.' : "פעיל · הבאה: מחר 10:48 · תזכורת לסוכן על ה-VGM.";
+  document.getElementById("carrierBox").innerHTML = ST.carrier
+    ? '<p><span class="warn">לבדיקה:</span> אצל המוביל ETD 03 Nov, בתיק 02 Nov · לא הוחל.</p><div class="fbtns" style="justify-content:flex-start"><button class="btn go" data-car="apply">עדכן את התיק ל-03 Nov</button><button class="btn" data-car="keep">השאר 02 Nov</button></div>'
+    : '<p>תקין · נבדק היום 09:30, המוביל והתיק מסכימים.</p>';
+  document.querySelectorAll("#autoSeg button").forEach(b => b.classList.toggle("on", b.dataset.m === ST.mode));
+  document.getElementById("autoTxt").textContent = ST.mode==="full" ? "כל המשימות יוצאות לבד, בלי לחכות לך." : ST.mode==="part" ? "רק המשימות המסומנות יוצאות לבד. השאר מחכות לך ב'צריך אותך'." : "שום דבר לא יוצא לבד. כל הודעה מחכה לאישור שלך.";
+  document.getElementById("tasks").innerHTML = TASKS.map((t,i) => `<label class="task"><input type="checkbox" data-task="${i}" ${ST.tasks[i]?"checked":""} ${ST.mode!=="part"?"disabled":""}> ${t}</label>`).join("");
+  document.getElementById("reqList").innerHTML = ST.req.map((r,i) => `<div class="req ${r[1]}" data-req="${i}"><i>${r[1]==="done"?"✓":r[1]==="miss"?"!":""}</i>${r[0]}${r[1]==="miss"?' <span class="m">· חסר</span>':''}</div>`).join("");
+  document.getElementById("docList").innerHTML = ST.docs.map((x,i) => `<div class="doc"><span>📄</span><span class="nm">${x[0]}</span>${x[1]?'<span class="newb">חדש</span><button class="btn" data-keep="'+i+'">שמור</button>':'<button class="lnk2">פתח</button>'}</div>`).join("");
+  document.getElementById("priceBtn").textContent = ST.prices ? "הסתר" : "הצג";
+  document.getElementById("priceTxt").innerHTML = ST.prices ? "עלות 2,140 USD · מכירה 2,480 USD · רווח 340 USD (נתונים מומצאים)" : "12 שורות · מוסתר";
+}
+const drawer = document.getElementById("drawer");
+function openDrawer(tab){
+  document.querySelectorAll(".dr-tab").forEach(b => b.classList.toggle("on", b.dataset.tab === tab));
+  document.querySelectorAll("[data-pane]").forEach(p => p.hidden = p.dataset.pane !== tab);
+  drawer.classList.add("open"); dim.classList.add("open");
+}
+document.addEventListener("click", e => { const o = e.target.closest("[data-open]"); if (o) { e.stopPropagation(); openDrawer(o.dataset.open); } });
+document.querySelectorAll(".dr-tab").forEach(b => b.onclick = () => openDrawer(b.dataset.tab));
+document.getElementById("drX").onclick = () => { drawer.classList.remove("open"); dim.classList.remove("open"); };
+dim.addEventListener("click", () => drawer.classList.remove("open"));
+document.getElementById("pauseBtn").onclick = () => { ST.paused = !ST.paused; paint(); toast(ST.paused ? "הבדיקות הושהו" : "הבדיקות חודשו"); };
+document.getElementById("carrierBox").onclick = e => { const b = e.target.closest("[data-car]"); if (!b) return; ST.carrier = false; paint(); toast(b.dataset.car === "apply" ? "ה-ETD עודכן ל-03 Nov" : "נשאר 02 Nov"); };
+document.getElementById("autoSeg").onclick = e => { const b = e.target.closest("button"); if (!b) return; ST.mode = b.dataset.m; if (ST.mode === "part") ST.tasks = [true,true,false,false]; paint(); };
+document.getElementById("tasks").onchange = e => { const i = e.target.dataset.task; if (i == null) return; ST.tasks[+i] = e.target.checked; paint(); };
+document.getElementById("reqList").onclick = e => { const r = e.target.closest("[data-req]"); if (!r) return; const x = ST.req[+r.dataset.req]; x[1] = x[1] === "done" ? "wait" : "done"; paint(); };
+document.getElementById("docList").onclick = e => { const b = e.target.closest("[data-keep]"); if (!b) return; ST.docs[+b.dataset.keep][1] = false; paint(); toast("המסמך נשמר בתיק"); };
+document.getElementById("priceBtn").onclick = () => { ST.prices = !ST.prices; paint(); };
+// which sketch
+
+const _render = render; render = function(){ _render(); paint(); };
+render();
+</script>
+</body>
+</html>
+
+Claude finished the response

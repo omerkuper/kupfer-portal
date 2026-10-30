@@ -3,12 +3,15 @@
 read token. The portal keeps none of it: a short cache so the page's 30-second refresh and a few open tabs do not
 turn into a stream of calls, and nothing else.
 
-A system that is down, slow (2 seconds) or refuses the token shows "—", never an error: the home page is the
-portal's, the numbers are the systems'. Tokens, in the portal's .env:
+A system that is down, slow or refuses the token shows "—", never an error: the home page is the portal's, the
+numbers are the systems'. The wait is KUPFER_SUMMARY_TIMEOUT seconds (8 by default: the desk's summary asks Supabase
+in the cloud several times, and prices the open exposures again once in two minutes - Poirot answers from SQLite in
+an instant). The numbers load after the page is shown, so the page itself never waits. Tokens, in the portal's .env:
 
     KUPFER_RFQ_TOKEN=...         the desk's POIROT_EVENTS_TOKEN (or its POIROT_INTAKE_TOKEN)
     KUPFER_POIROT_TOKEN=...      Poirot's POIROT_INTAKE_TOKEN (or POIROT_API_TOKEN)
     KUPFER_TRACKER_TOKEN=...     the tracker's TRACKER_API_TOKEN - leave empty when it has none
+    KUPFER_SUMMARY_TIMEOUT=8     seconds to wait for each system's answer
 
 Without a token the system is not asked. The contracts' keys are listed in CONTRACTS.md; a key missing from an
 answer reads as "—" here, so an older system never breaks the page.
@@ -16,6 +19,7 @@ answer reads as "—" here, so an older system never breaks the page.
 from __future__ import annotations
 
 import json
+import logging
 import os
 import threading
 import time
@@ -24,7 +28,8 @@ import urllib.request
 from dataclasses import dataclass
 from typing import Any, Callable, Mapping, Optional
 
-TIMEOUT = 2.0
+TIMEOUT = 8.0
+log = logging.getLogger("kupfer.summary")
 CACHE_SECONDS = 10.0
 
 # server id in systems.yaml -> (the summary's path, the .env variable with its token)
@@ -51,9 +56,16 @@ def _urllib_http(url: str, token: str, timeout: float) -> Optional[dict]:
     try:
         with urllib.request.urlopen(req, timeout=timeout) as resp:  # noqa: S310 - his own systems on this computer
             body = json.loads(resp.read().decode("utf-8"))
-    except (urllib.error.URLError, OSError, ValueError):
+    except urllib.error.HTTPError as exc:          # the system answered, and refused: say with what
+        log.warning("summary %s: HTTP %s %s", url, exc.code, (exc.read() or b"")[:200].decode("utf-8", "replace"))
         return None
-    return body if isinstance(body, dict) else None
+    except (urllib.error.URLError, OSError, ValueError) as exc:   # not reached, too slow, or not JSON
+        log.warning("summary %s: %s", url, getattr(exc, "reason", exc))
+        return None
+    if not isinstance(body, dict):
+        log.warning("summary %s: not a JSON object", url)
+        return None
+    return body
 
 
 class Summaries:
@@ -99,6 +111,7 @@ class Summaries:
     def from_config(cls, servers: Mapping[str, Any], env: Optional[Mapping[str, str]] = None, **kw) -> "Summaries":
         """The sources the systems.yaml servers give: a server whose id SOURCES knows, at its port."""
         env = os.environ if env is None else env
+        kw.setdefault("timeout", _seconds(env.get("KUPFER_SUMMARY_TIMEOUT"), TIMEOUT))
         sources = {}
         for sid, (path, var) in SOURCES.items():
             server = servers.get(sid)
@@ -108,6 +121,14 @@ class Summaries:
             sources[sid] = Source(id=sid, url=f"http://127.0.0.1:{server.port}{path}", token=token,
                                   asked=bool(token) or sid == "tracker_api")
         return cls(sources, **kw)
+
+
+def _seconds(value: Optional[str], default: float) -> float:
+    try:
+        seconds = float(str(value or "").strip() or default)
+    except ValueError:
+        return default
+    return seconds if 0 < seconds <= 60 else default
 
 
 def count(answer: Optional[dict], key: str) -> Optional[int]:

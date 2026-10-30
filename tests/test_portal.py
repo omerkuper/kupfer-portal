@@ -505,6 +505,9 @@ def test_a_system_without_a_token_is_not_asked_except_the_tracker(tmp_path):
     assert sums.sources["poirot"].asked and sums.sources["poirot"].url == "http://127.0.0.1:8001/api/summary"
     assert not sums.sources["rfq"].asked, "no KUPFER_RFQ_TOKEN: the desk would only answer 401"
     assert sums.sources["tracker_api"].asked and sums.sources["tracker_api"].url == "http://127.0.0.1:8770/summary"
+    assert sums.timeout == 8.0, "the desk asks Supabase in the cloud: two seconds were not enough (30 Oct)"
+    assert summary_mod.Summaries.from_config(cfg.servers, env={"KUPFER_SUMMARY_TIMEOUT": "15"}).timeout == 15.0
+    assert summary_mod.Summaries.from_config(cfg.servers, env={"KUPFER_SUMMARY_TIMEOUT": "nope"}).timeout == 8.0
 
 
 def test_home_numbers_read_the_contracts_and_tolerate_a_missing_system():
