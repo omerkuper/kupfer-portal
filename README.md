@@ -97,6 +97,9 @@ The tests start small stand-in web servers on free ports. Nothing real is starte
 1. **Shell (this):** rail, tabs, start/stop/log, live status.
 2. **Data on the home screen (done, 29 Oct):** a read-only summary endpoint in each system feeds the counts in
    the flow strip and "Needs you".
+   **Shared screens (done, 30 Oct, stage 6):** the desk's approval form picks a customer Poirot knows, Poirot's
+   file reads the agent as the desk's book has him today; the portal opens the existing screens (a `customers`
+   view, "New customer" in Quick start) - no screen is copied into another system (CONTRACTS.md).
 3. **Smart search:** a B/L or AWB goes to tracking, a file number to Poirot, an RFQ number to the desk.
 
 ## After updating a system's code

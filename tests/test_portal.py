@@ -97,6 +97,11 @@ def test_the_real_systems_yaml_loads():
     assert cfg.views["sim"].server == "rfq"
     assert cfg.views["calculator"].external
     assert all(q.view in cfg.views for q in cfg.quick + cfg.flow)
+    # stage 6 (30 Oct): the customers live in Poirot, the agents on the desk - the portal only opens the screens
+    assert cfg.views["customers"].server == "poirot" and cfg.views["customers"].path == "/customers"
+    assert cfg.views["agents"].server == "rfq" and cfg.views["agents"].path == "/desk/agents"
+    quick = {q.view: q.path for q in cfg.quick}
+    assert quick["customers"] == "/customers" and quick["agents"] == "/desk/agents" and quick["poirot"] == "/shipments/new"
 
 
 @pytest.mark.parametrize("bad", ["//evil.com/x", "http://evil.com", "evil", "/a\\b", "/a\nb", ""])

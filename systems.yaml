@@ -85,6 +85,12 @@ views:
     icon: agents
     server: rfq
     path: /desk/agents
+  - id: customers
+    label: לקוחות
+    label_en: Customers
+    icon: customer
+    server: poirot
+    path: /customers
   - id: calculator
     label: מחשבון
     label_en: Calculator
@@ -123,6 +129,12 @@ quick:
     path: /desk/agents
     tag: AGENTS
     icon: agents
+  - label: לקוח חדש
+    label_en: New customer
+    view: customers
+    path: /customers
+    tag: POIROT
+    icon: customer
   - label: בדיקת שטר מטען
     label_en: Check a B/L
     view: tracking
