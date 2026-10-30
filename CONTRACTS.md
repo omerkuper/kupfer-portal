@@ -40,7 +40,7 @@ The ports are the ones the systems' own `.env` files expect; the portal's `syste
 | Code | RFQ: `app/services/poirot_handoff.py`, `booking_package.py` · Poirot: `poirot/operator/intake.py`, `poirot/web/app.py` (`/api/intake/*`) |
 | Contract test | RFQ: `tests/test_offers_booking_flow.py` runs against Poirot's own reader when `POIROT_PROJECT` is set |
 | Resilience today | RFQ keeps `status` (NOT_SENT / SENT / FAILED / REJECTED), `attempts`, `last_error`; *Send again* on the desk. Poirot answers a replay of the same package with `200 replay` (payload hash) and `409` once the booking was opened – **no duplicate file is possible**. |
-| Missing | an automatic retry on the RFQ side (today a failure waits for *Send again*) → stage 5 |
+| Retry | automatic since stage 5 (`app/services/handoff_retry.py`): 1, 5, 15, 60 min, then hourly, 24 attempts; then the desk |
 
 ### 2. Poirot → RFQ: milestones and the price basis (`docs/POIROT_API.md` in the RFQ repo)
 
@@ -99,7 +99,7 @@ open the portal as `localhost`, never `127.0.0.1`.
 | 4 ✔ | agent lookup (built 29 Oct) | Poirot → RFQ | `GET /api/agents?q=&mode=` · `GET /api/agents/{id}` (`agents.v1`, `app/routers/agents_api.py`, token `POIROT_EVENTS_TOKEN`) | RFQ | built on `app/agent_book/api.py`; read-only; no consumer yet (stage 6) |
 | 4 ✔ | customer list (built 29 Oct) | RFQ → Poirot | `GET /api/clients/options?q=` · `GET /api/clients/{key}` (`clients.v1`, `poirot/web/app.py`, token `POIROT_INTAKE_TOKEN`) | Poirot | key + name for pick lists; read-only; no consumer yet (stage 6) |
 | 4 ✔ | the numbers on the home page (built 29 Oct) | portal → RFQ, Poirot, tracker | `GET /api/summary` on the desk and on Poirot, `GET /summary` on the tracker API (`summary.v1`); the portal's `portal/summary.py`, tokens `KUPFER_RFQ_TOKEN` / `KUPFER_POIROT_TOKEN` / `KUPFER_TRACKER_TOKEN` | each | 8 s timeout (`KUPFER_SUMMARY_TIMEOUT`), 10 s cache; a system down shows "—" |
-| 5 | automatic retry of the booking | RFQ → Poirot | same `booking.v1`; retry at 1, 5, 15, 60 min, then a desk card | – | Poirot's replay/409 answers make the retry safe |
+| 5 ✔ | automatic retry of the booking (built 30 Oct) | RFQ → Poirot | same `booking.v1`, sent again by `app/services/handoff_retry.py`: after 1, 5, 15, 60 min, then hourly, 24 attempts by itself; the desk rail lists what still waits; "Send again" always | – | only FAILED is retried (never REJECTED / NOT_SENT / SENT); Poirot's replay/409 answers make it safe |
 | 7 | scheduled tracking that reaches the file | tracker → Poirot | tracker runs checks on a schedule; Poirot reads `GET /changes?since=N` (exists) or the tracker POSTs a signed `tracking.v1` event; per-file schedule set from Poirot; "check now" stays | tracker (events) / Poirot (what to do) | decided 29 Oct: build it (replaces the 8 Oct "live check only" rule); no message to a party ever leaves the tracker |
 
 ## The read contracts (stage 4)
