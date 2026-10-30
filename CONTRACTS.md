@@ -65,7 +65,7 @@ The ports are the ones the systems' own `.env` files expect; the portal's `syste
 | Owner | tracking events are the tracker's; what to do with them (3-day / 6-day thresholds, the shadow period) is Poirot's; every message to a party leaves from Poirot |
 | Code | Poirot: `poirot/tracking/tracker_client.py`, `eta_check.py`, `carrier_rules.py` · Tracker: `api.py`, `tracking/poirot_api.py`, `tracking/service.py` |
 | Resilience today | one live check at a time, a 60 s gap per carrier; a tracker that is down leaves the file tracked by what the forwarder wrote |
-| Note | `GET /changes?since=N` already exists and is the natural base for stage 7 (scheduled checks that reach Poirot) |
+| Since stage 7 | the tracker checks by itself (air 3 h / sea 6 h) and Poirot reads `GET /changes?since=N` every 5 minutes |
 
 ### 4. Portal → every system: start, stop, probe, embed
 
@@ -100,7 +100,7 @@ open the portal as `localhost`, never `127.0.0.1`.
 | 4 ✔ | customer list (built 29 Oct) | RFQ → Poirot | `GET /api/clients/options?q=` · `GET /api/clients/{key}` (`clients.v1`, `poirot/web/app.py`, token `POIROT_INTAKE_TOKEN`) | Poirot | key + name for pick lists; read-only; no consumer yet (stage 6) |
 | 4 ✔ | the numbers on the home page (built 29 Oct) | portal → RFQ, Poirot, tracker | `GET /api/summary` on the desk and on Poirot, `GET /summary` on the tracker API (`summary.v1`); the portal's `portal/summary.py`, tokens `KUPFER_RFQ_TOKEN` / `KUPFER_POIROT_TOKEN` / `KUPFER_TRACKER_TOKEN` | each | 8 s timeout (`KUPFER_SUMMARY_TIMEOUT`), 10 s cache; a system down shows "—" |
 | 5 ✔ | automatic retry of the booking (built 30 Oct) | RFQ → Poirot | same `booking.v1`, sent again by `app/services/handoff_retry.py`: after 1, 5, 15, 60 min, then hourly, 24 attempts by itself; the desk rail lists what still waits; "Send again" always | – | only FAILED is retried (never REJECTED / NOT_SENT / SENT); Poirot's replay/409 answers make it safe |
-| 7 | scheduled tracking that reaches the file | tracker → Poirot | tracker runs checks on a schedule; Poirot reads `GET /changes?since=N` (exists) or the tracker POSTs a signed `tracking.v1` event; per-file schedule set from Poirot; "check now" stays | tracker (events) / Poirot (what to do) | decided 29 Oct: build it (replaces the 8 Oct "live check only" rule); no message to a party ever leaves the tracker |
+| 7 ✔ | scheduled tracking that reaches the file (built 30 Oct) | tracker → Poirot | the tracker API checks by itself (`tracking/scheduler.py`: air every 3 h, sea every 6, OOCL never; `TRACKER_CHECK_AIR_HOURS` / `TRACKER_CHECK_SEA_HOURS`, `--no-schedule`); Poirot's heartbeat reads `GET /changes?since=N` every 5 min from where it stopped (`poirot/tracking/tracker_feed.py`) and runs the scheduled check step on each file touched; the per-file schedule and "Check now" stay | tracker (events) / Poirot (what to do) | no webhook, no queue; nothing to a party from the tracker; a Poirot that was off catches up |
 
 ## The read contracts (stage 4)
 
