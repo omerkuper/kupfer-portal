@@ -65,13 +65,13 @@
             <h2 id="flow-title">{{ t('flow_title') }}</h2>
             <span class="muted">{{ t('flow_hint') }}</span>
           </div>
-          <div class="flow-strip">
+          <div id="flow" class="flow-strip" hx-get="/partials/flow" hx-trigger="load, kp:home from:body, every 30s" hx-swap="outerHTML">
             {% for f in cfg.flow %}
             <button type="button" class="flow-step" data-open="{{ f.view }}" data-label="{{ cfg.views[f.view].text(lang) }}" {% if f.path %}data-path="{{ f.path }}"{% endif %}>
               <span class="flow-num" aria-hidden="true">—</span>
               <span class="flow-body">
                 <span class="flow-name">{{ f.text(lang) }} <i class="tag" dir="ltr">{{ f.tag }}</i></span>
-                <span class="flow-sub">{{ t('not_connected') }}</span>
+                <span class="flow-sub">{{ t('flow_loading') }}</span>
               </span>
               {% if not loop.last %}<span class="flow-arrow">{{ icon('chevron', 20) }}</span>{% endif %}
             </button>
@@ -95,8 +95,9 @@
 
           <div class="card">
             <div class="card-head"><h2>{{ t('needs_title') }}</h2><span class="pill pill-amber">{{ icon('bell', 14) }}</span></div>
-            <p class="placeholder">{{ t('needs_wait') }}</p>
-            <button type="button" class="btn btn-ghost" data-open="poirot" data-label="{{ cfg.views['poirot'].text(lang) if 'poirot' in cfg.views else 'Poirot' }}">{{ t('open_poirot') }}</button>
+            <div id="needs" hx-get="/partials/needs" hx-trigger="load, kp:home from:body, every 30s" hx-swap="outerHTML">
+              <p class="placeholder">{{ t('flow_loading') }}</p>
+            </div>
           </div>
 
           <div class="card">

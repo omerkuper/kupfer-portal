@@ -42,6 +42,20 @@ is why `localhost`, never `127.0.0.1`. The session is only your browser's: the s
 each other and to the mail when it ends. Locked out? Remove `KUPFER_PORTAL_KEY` from `.env` and restart the portal.
 `portal/session.py` has the details.
 
+## The numbers on the home page
+
+The flow strip and "Needs you" show each system's own counts (`portal/summary.py`): the desk's `GET /api/summary`,
+Poirot's `GET /api/summary`, the tracker API's `GET /summary` - every 30 seconds, over each system's read token,
+in the portal's `.env`:
+
+```
+KUPFER_RFQ_TOKEN=<the desk's POIROT_EVENTS_TOKEN (or its POIROT_INTAKE_TOKEN)>
+KUPFER_POIROT_TOKEN=<Poirot's POIROT_INTAKE_TOKEN (or POIROT_API_TOKEN)>
+KUPFER_TRACKER_TOKEN=<the tracker's TRACKER_API_TOKEN - leave out when it has none>
+```
+
+A system that is off, slow or without a token shows "—". The contracts (`summary.v1`) are in `CONTRACTS.md`.
+
 ## Settings: `systems.yaml`
 
 - `servers`: what the portal can start. Folder, the venv's python, the command, the port, and a
@@ -51,7 +65,7 @@ each other and to the mail when it ends. Locked out? Remove `KUPFER_PORTAL_KEY` 
 - `views`: the rail buttons. Each one is a system plus a page in it, or an outside address (`url`) that
   opens in a new window. **Fill in the calculator's Render address** under `calculator → url`.
 - `quick`: the "quick start" list on the home screen.
-- `flow`: the four steps of the work. In phase 1 they open the system. The counts arrive in phase 2.
+- `flow`: the four steps of the work; each opens its system and shows its count (see "The numbers").
 
 ## What is where
 
@@ -62,6 +76,7 @@ each other and to the mail when it ends. Locked out? Remove `KUPFER_PORTAL_KEY` 
 | `portal/supervisor.py` | start / stop / status / logs. Only commands from `systems.yaml` are ever run |
 | `portal/config.py` | reads `systems.yaml` |
 | `portal/session.py` | the one sign-in: the signed `kupfer_session` cookie the RFQ desk honours too |
+| `portal/summary.py` | the numbers on the home page, from each system's summary.v1 |
 | `portal/i18n.py` | Hebrew (default) and English |
 | `portal/static/portal.js` | the only script: tabs and Ctrl K |
 | `logs/` | each system's output when started from the portal (not in git) |
@@ -79,8 +94,8 @@ The tests start small stand-in web servers on free ports. Nothing real is starte
 ## Phases
 
 1. **Shell (this):** rail, tabs, start/stop/log, live status.
-2. **Data on the home screen:** a small read-only summary endpoint in each system feeds the counts in
-   the flow strip, "Needs you" and more. Each one is a change inside that system, shown before it is made.
+2. **Data on the home screen (done, 29 Oct):** a read-only summary endpoint in each system feeds the counts in
+   the flow strip and "Needs you".
 3. **Smart search:** a B/L or AWB goes to tracking, a file number to Poirot, an RFQ number to the desk.
 
 ## After updating a system's code

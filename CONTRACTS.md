@@ -96,11 +96,34 @@ open the portal as `localhost`, never `127.0.0.1`.
 | Stage | Connection | Direction | Endpoint (proposed) | Owner | Notes |
 |---|---|---|---|---|---|
 | 2 ✔ | one session (built 29 Oct) | portal → RFQ desk | signed cookie `kupfer_session` on `localhost` (`portal/session.py`), verified by the desk with the shared `KUPFER_SESSION_SECRET` (`app/security.py`) | portal | the desk's `DESK_KEY` stays as a fallback; Poirot and the tracker have no sign-in today, so there was nothing to unify - the same cookie can lock them later |
-| 4 | agent lookup | Poirot → RFQ | `GET /api/agents/{id}` · `GET /api/agents?q=` (`agents.v1`) | RFQ | built on `app/agent_book/api.py`; read-only |
-| 4 | customer list | RFQ → Poirot | `GET /api/clients/options` · `GET /api/clients/{id}` (`clients.v1`) | Poirot | id + name for pick lists; read-only |
-| 4 | counts for the flow strip | portal → RFQ, Poirot, tracker | one small read-only summary endpoint per system | each | the portal README's phase 2 |
+| 4 ✔ | agent lookup (built 29 Oct) | Poirot → RFQ | `GET /api/agents?q=&mode=` · `GET /api/agents/{id}` (`agents.v1`, `app/routers/agents_api.py`, token `POIROT_EVENTS_TOKEN`) | RFQ | built on `app/agent_book/api.py`; read-only; no consumer yet (stage 6) |
+| 4 ✔ | customer list (built 29 Oct) | RFQ → Poirot | `GET /api/clients/options?q=` · `GET /api/clients/{key}` (`clients.v1`, `poirot/web/app.py`, token `POIROT_INTAKE_TOKEN`) | Poirot | key + name for pick lists; read-only; no consumer yet (stage 6) |
+| 4 ✔ | the numbers on the home page (built 29 Oct) | portal → RFQ, Poirot, tracker | `GET /api/summary` on the desk and on Poirot, `GET /summary` on the tracker API (`summary.v1`); the portal's `portal/summary.py`, tokens `KUPFER_RFQ_TOKEN` / `KUPFER_POIROT_TOKEN` / `KUPFER_TRACKER_TOKEN` | each | 2 s timeout, 10 s cache; a system down shows "—" |
 | 5 | automatic retry of the booking | RFQ → Poirot | same `booking.v1`; retry at 1, 5, 15, 60 min, then a desk card | – | Poirot's replay/409 answers make the retry safe |
 | 7 | scheduled tracking that reaches the file | tracker → Poirot | tracker runs checks on a schedule; Poirot reads `GET /changes?since=N` (exists) or the tracker POSTs a signed `tracking.v1` event; per-file schedule set from Poirot; "check now" stays | tracker (events) / Poirot (what to do) | decided 29 Oct: build it (replaces the 8 Oct "live check only" rule); no message to a party ever leaves the tracker |
+
+## The read contracts (stage 4)
+
+Every answer carries `"contract"`; a key added, renamed or changed in meaning is a new version. Numbers are JSON
+numbers, never strings. All GET, all read-only, all 401 on a bad token and 503 when the side has no token set.
+
+**agents.v1** (RFQ desk, `Authorization: Bearer <POIROT_EVENTS_TOKEN>`)
+
+- `GET /api/agents?q=<words>&mode=AIR|FCL|LCL` → `{contract, count, agents: [{id, name, country, city, status, modes, specialties}]}` - active agents, sorted by name; `modes` = the modes with an active service.
+- `GET /api/agents/{id}` → `{contract, agent: {…the brief fields…, website, notes, always_cc, services: [{mode, active, covers, excludes, gateways}], contacts: [{id, name, role, email, phone, modes, is_primary, sales, paused}]}}` - the primary contact first; an archived agent is still readable (a booking may name it); unknown → 404.
+
+**clients.v1** (Poirot, `Authorization: Bearer <POIROT_INTAKE_TOKEN>`)
+
+- `GET /api/clients/options?q=<words>` → `{contract, count, clients: [{key, name, company, contact_name, email}]}` - sorted by name.
+- `GET /api/clients/{key}` → `{contract, client: {key, name, company, contact_name, email, phone, address, tax_id, external_id, notes, source, files, updated_at}}`; unknown → 404. The key is Poirot's customer key (`ext:<quote-system id>`, the lower-cased email, or `name:<company>`).
+
+**summary.v1**
+
+- RFQ desk `GET /api/summary` → `{contract, system: "rfq", rfq_open, rfq_waiting, quotes_by_email, offers_awaiting_client, price_exposures, agents}`
+- Poirot `GET /api/summary` → `{contract, system: "poirot", needs_you, files_open, on_the_way, arrived, bookings_pending, mail_to_file}`
+- Tracker `GET /summary` (token `TRACKER_API_TOKEN` when set) → `{contract, system: "tracker", active, sea, air, stale, changes_24h, last_check_at}`
+
+How the portal reads them: flow strip = `rfq_waiting`, `offers_awaiting_client`, `files_open`, `on_the_way`; "Needs you" = `needs_you`, `bookings_pending`, `rfq_waiting + quotes_by_email + price_exposures`, `stale`.
 
 ## Checked on 29 Oct 2026 (stage 0)
 

@@ -1,0 +1,27 @@
+{% from "_icons.html" import icon %}
+<div id="needs" hx-get="/partials/needs" hx-trigger="kp:home from:body, every 30s" hx-swap="outerHTML">
+  {% set rows = [
+      ('poirot', n.needs.poirot if n else None, 'needs_poirot', 'poirot', none),
+      ('bookings', n.needs.bookings if n else None, 'needs_bookings', 'poirot', none),
+      ('rfq', n.needs.rfq if n else None, 'needs_rfq', 'rfq', none),
+      ('tracker', n.needs.tracker if n else None, 'needs_tracker', 'tracking', none)] %}
+  {% set shown = rows | selectattr(1) | list %}
+  {% if n and n.needs_total is not none %}
+    {% if shown %}
+    <ul class="needs-list">
+      {% for key, num, label, view, path in shown %}
+      {% if view in cfg.views %}
+      <li><button type="button" class="needs-row" data-open="{{ view }}" data-label="{{ cfg.views[view].text(lang) }}">
+        <span class="needs-num">{{ num }}</span><span class="needs-text">{{ t(label, n=num) }}</span>{{ icon('chevron', 16) }}
+      </button></li>
+      {% endif %}
+      {% endfor %}
+    </ul>
+    {% else %}
+    <p class="placeholder">{{ t('needs_quiet') }}</p>
+    {% endif %}
+  {% else %}
+    <p class="placeholder">{{ t('needs_off') }}</p>
+    {% if 'poirot' in cfg.views %}<button type="button" class="btn btn-ghost" data-open="poirot" data-label="{{ cfg.views['poirot'].text(lang) }}">{{ t('open_poirot') }}</button>{% endif %}
+  {% endif %}
+</div>

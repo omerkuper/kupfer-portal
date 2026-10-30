@@ -70,6 +70,19 @@ T: dict[str, dict[str, str]] = {
         "login_wrong": "המפתח לא נכון.",
         "logout": "יציאה",
         "logout_label": "יציאה מהפורטל ומהמערכות",
+        "flow_loading": "טוען…",
+        "flow_off": "המערכת כבויה",
+        "flow_unknown": "אין מספר",
+        "flow_rfq": "ממתינות לטיפול שלך",
+        "flow_sim": "אצל הלקוח, ממתינות לתשובה",
+        "flow_poirot": "תיקים פתוחים",
+        "flow_tracking": "הפליגו או המריאו, טרם הגיעו",
+        "needs_poirot": "דורשים החלטה ב-Poirot",
+        "needs_bookings": "הזמנות חדשות לפתיחה",
+        "needs_rfq": "ממתינים בשולחן ה-RFQ",
+        "needs_tracker": "משלוחים שהמעקב לא מצליח לבדוק",
+        "needs_quiet": "שקט. שום דבר לא מחכה לך כרגע.",
+        "needs_off": "המערכות כבויות או לא הוגדר להן טוקן בפורטל (KUPFER_POIROT_TOKEN, KUPFER_RFQ_TOKEN).",
     },
     "en": {
         "home": "Home",
@@ -133,6 +146,19 @@ T: dict[str, dict[str, str]] = {
         "login_wrong": "That is not the key.",
         "logout": "Sign out",
         "logout_label": "Sign out of the portal and the systems",
+        "flow_loading": "Loading…",
+        "flow_off": "System is off",
+        "flow_unknown": "No number",
+        "flow_rfq": "waiting for you",
+        "flow_sim": "with the client, awaiting an answer",
+        "flow_poirot": "open files",
+        "flow_tracking": "sailed or flown, not yet arrived",
+        "needs_poirot": "need a decision in Poirot",
+        "needs_bookings": "new bookings to open",
+        "needs_rfq": "waiting on the RFQ desk",
+        "needs_tracker": "shipments the tracker cannot check",
+        "needs_quiet": "Quiet. Nothing waits for you right now.",
+        "needs_off": "The systems are off, or the portal has no token for them (KUPFER_POIROT_TOKEN, KUPFER_RFQ_TOKEN).",
     },
 }
 
@@ -148,6 +174,7 @@ def translator(lang: str):
         s = table.get(key) or T["he"].get(key) or key
         return s.format(**kw) if kw else s
 
+    t.keys = lambda: set(table) | set(T["he"])   # type: ignore[attr-defined] - templates ask "is there a text for this?"
     return t
 
 

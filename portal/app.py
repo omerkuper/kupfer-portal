@@ -24,6 +24,7 @@ from portal import i18n
 from portal.config import Config, View, load, safe_path
 from portal.recent import Recent
 from portal.session import COOKIE as SESSION_COOKIE, Session
+from portal.summary import Summaries, home_numbers
 from portal.supervisor import CONFLICT, CRASHED, EXTERNAL, RUNNING, STARTING, Status, Supervisor
 
 HERE = Path(__file__).resolve().parent
@@ -34,11 +35,12 @@ OPEN_PATHS = ("/login", "/healthz")   # reachable without a session (and /static
 
 def create_app(config: Optional[Config] = None, supervisor: Optional[Supervisor] = None,
                recent: Optional[Recent] = None, stop_on_exit: bool = True,
-               session: Optional[Session] = None) -> Starlette:
+               session: Optional[Session] = None, summaries: Optional[Summaries] = None) -> Starlette:
     cfg = config or load()
     sup = supervisor or Supervisor(cfg.servers)
     rec = recent or Recent()
     ses = session if session is not None else Session.from_env()
+    sums = summaries if summaries is not None else Summaries.from_config(cfg.servers)
     templates = Jinja2Templates(directory=str(HERE / "templates"))
     asset_v = str(int(time.time()))
 
@@ -92,6 +94,12 @@ def create_app(config: Optional[Config] = None, supervisor: Optional[Supervisor]
             when = time.strftime("%H:%M" if time.strftime("%Y-%m-%d", at) == today else "%d.%m", at)
             items.append({**i, "when": when})
         return render(request, "partials/recent.html", items=items)
+
+    async def flow_partial(request: Request) -> Response:
+        """The numbers on the flow strip and the 'Needs you' card - each system's summary.v1 (portal/summary.py)."""
+        numbers = await run_in_threadpool(lambda: home_numbers(sums.all()))
+        name = "partials/needs.html" if request.url.path.endswith("/needs") else "partials/flow.html"
+        return render(request, name, n=numbers)
 
     async def tab_partial(request: Request, view_id: Optional[str] = None, path: Optional[str] = None,
                           remember: bool = True) -> Response:
@@ -212,6 +220,8 @@ def create_app(config: Optional[Config] = None, supervisor: Optional[Supervisor]
         Route("/logout", logout, methods=["POST"]),
         Route("/partials/status", status_partial),
         Route("/partials/recent", recent_partial),
+        Route("/partials/flow", flow_partial),
+        Route("/partials/needs", flow_partial),
         Route("/partials/tab/{view}", tab_partial),
         Route("/servers/all/{action}", all_action, methods=["POST"]),
         Route("/servers/{sid}/log", log_page),
@@ -222,6 +232,7 @@ def create_app(config: Optional[Config] = None, supervisor: Optional[Supervisor]
     app.state.supervisor = sup
     app.state.config = cfg
     app.state.session = ses
+    app.state.summaries = sums
 
     templates.env.globals.update(RUNNING=RUNNING, EXTERNAL=EXTERNAL, STARTING=STARTING, CRASHED=CRASHED,
                                  CONFLICT=CONFLICT)

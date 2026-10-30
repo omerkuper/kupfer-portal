@@ -1,0 +1,16 @@
+{% from "_icons.html" import icon %}
+<div class="flow-strip" id="flow" hx-get="/partials/flow" hx-trigger="kp:home from:body, every 30s" hx-swap="outerHTML">
+  {% for f in cfg.flow %}
+  {% set num = n.flow.get(f.view) if n else None %}
+  {% set sys = cfg.views[f.view].server %}
+  {% set up = n.up.get('rfq' if sys == 'rfq' else 'poirot' if sys == 'poirot' else 'tracker_api') if n else False %}
+  <button type="button" class="flow-step" data-open="{{ f.view }}" data-label="{{ cfg.views[f.view].text(lang) }}" {% if f.path %}data-path="{{ f.path }}"{% endif %}>
+    <span class="flow-num{% if num is not none %} live{% endif %}" aria-hidden="true">{{ num if num is not none else '—' }}</span>
+    <span class="flow-body">
+      <span class="flow-name">{{ f.text(lang) }} <i class="tag" dir="ltr">{{ f.tag }}</i></span>
+      <span class="flow-sub">{% if num is not none %}{{ t('flow_' ~ f.view, n=num) if ('flow_' ~ f.view) in t.keys() else '' }}{% elif up %}{{ t('flow_unknown') }}{% else %}{{ t('flow_off') }}{% endif %}</span>
+    </span>
+    {% if not loop.last %}<span class="flow-arrow">{{ icon('chevron', 20) }}</span>{% endif %}
+  </button>
+  {% endfor %}
+</div>

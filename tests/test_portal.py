@@ -23,6 +23,7 @@ from portal import config as config_mod  # noqa: E402
 from portal.app import create_app  # noqa: E402
 from portal.recent import Recent  # noqa: E402
 from portal import session as session_mod  # noqa: E402
+from portal import summary as summary_mod  # noqa: E402
 from portal.supervisor import (CONFLICT, CRASHED, EXTERNAL, RUNNING, STOPPED, Supervisor,  # noqa: E402
                                port_open)
 
@@ -42,7 +43,8 @@ def wait_for(pred, timeout=10.0):
     return False
 
 
-def write_config(tmp: Path, portal_port: int, dummy_port: int, extra: str = "") -> Path:
+def write_config(tmp: Path, portal_port: int, dummy_port: int, extra: str = "", views_extra: str = "",
+                 flow_extra: str = "") -> Path:
     py = sys.executable.replace("\\", "/")
     (tmp / "whoami.txt").write_text("dummy-ok", encoding="utf-8")
     text = f"""
@@ -68,6 +70,7 @@ views:
     label: מחשבון
     label_en: Calculator
     url: ""
+{views_extra}
 quick:
   - label: פתיחה
     view: dummy
@@ -77,6 +80,7 @@ flow:
   - label: שלב
     view: dummy
     tag: DUMMY
+{flow_extra}
 """
     path = tmp / "systems.yaml"
     path.write_text(textwrap.dedent(text), encoding="utf-8")
@@ -453,3 +457,145 @@ def test_with_no_key_the_portal_has_no_sign_in(portal):
     assert raw(base + "/login")[0] == 303, "nothing to sign in to: sent home"
     _, _, body = raw(base + "/")
     assert 'action="/logout"' not in body
+
+
+# ---------------------------------------------------------------------- the numbers (portal/summary.py)
+RFQ_ANSWER = {"contract": "summary.v1", "system": "rfq", "rfq_open": 5, "rfq_waiting": 2, "quotes_by_email": 1,
+              "offers_awaiting_client": 3, "price_exposures": 0, "agents": 7}
+POIROT_ANSWER = {"contract": "summary.v1", "system": "poirot", "needs_you": 4, "files_open": 9, "on_the_way": 6,
+                 "arrived": 1, "bookings_pending": 1, "mail_to_file": 0}
+TRACKER_ANSWER = {"contract": "summary.v1", "system": "tracker", "active": 6, "sea": 5, "air": 1, "stale": 0,
+                  "changes_24h": 2, "last_check_at": "2026-10-29T08:00:00+00:00"}
+
+
+def fake_http(answers):
+    calls = []
+
+    def http(url, token, timeout):
+        calls.append((url, token))
+        return answers.get(url)
+    http.calls = calls
+    return http
+
+
+def three_sources():
+    return {"rfq": summary_mod.Source("rfq", "http://rfq/api/summary", "t-rfq"),
+            "poirot": summary_mod.Source("poirot", "http://poirot/api/summary", "t-poirot"),
+            "tracker_api": summary_mod.Source("tracker_api", "http://tracker/summary", "")}
+
+
+def test_summaries_ask_each_system_with_its_token_and_remember_for_a_while():
+    http = fake_http({"http://rfq/api/summary": RFQ_ANSWER, "http://poirot/api/summary": POIROT_ANSWER})
+    clock = [100.0]
+    sums = summary_mod.Summaries(three_sources(), http=http, cache_seconds=10, clock=lambda: clock[0])
+    answers = sums.all()
+    assert answers["rfq"] == RFQ_ANSWER and answers["poirot"] == POIROT_ANSWER and answers["tracker_api"] is None
+    assert sorted(http.calls) == [("http://poirot/api/summary", "t-poirot"), ("http://rfq/api/summary", "t-rfq"),
+                                  ("http://tracker/summary", "")]
+    sums.all()
+    assert len(http.calls) == 3, "within the cache window nothing is asked again"
+    clock[0] += 11
+    sums.all()
+    assert len(http.calls) == 6
+
+
+def test_a_system_without_a_token_is_not_asked_except_the_tracker(tmp_path):
+    cfg = config_mod.load(ROOT / "systems.yaml")
+    sums = summary_mod.Summaries.from_config(cfg.servers, env={"KUPFER_POIROT_TOKEN": "p"})
+    assert sums.sources["poirot"].asked and sums.sources["poirot"].url == "http://127.0.0.1:8001/api/summary"
+    assert not sums.sources["rfq"].asked, "no KUPFER_RFQ_TOKEN: the desk would only answer 401"
+    assert sums.sources["tracker_api"].asked and sums.sources["tracker_api"].url == "http://127.0.0.1:8770/summary"
+
+
+def test_home_numbers_read_the_contracts_and_tolerate_a_missing_system():
+    n = summary_mod.home_numbers({"rfq": RFQ_ANSWER, "poirot": POIROT_ANSWER, "tracker_api": TRACKER_ANSWER})
+    assert n["flow"] == {"rfq": 2, "sim": 3, "poirot": 9, "tracking": 6}
+    assert n["needs"] == {"poirot": 4, "rfq": 3, "bookings": 1, "tracker": 0} and n["needs_total"] == 8
+    n = summary_mod.home_numbers({"rfq": None, "poirot": POIROT_ANSWER, "tracker_api": None})
+    assert n["flow"] == {"rfq": None, "sim": None, "poirot": 9, "tracking": 6} and n["needs"]["rfq"] is None
+    assert n["needs_total"] == 5 and n["up"] == {"rfq": False, "poirot": True, "tracker_api": False}
+    assert summary_mod.home_numbers({})["needs_total"] is None
+    assert summary_mod.count({"needs_you": "4"}, "needs_you") is None, "a number is a number, never a string"
+    assert summary_mod.count({"needs_you": True}, "needs_you") is None
+
+
+@pytest.fixture()
+def counted_portal(tmp_path):
+    pport, dport = free_port(), free_port()
+    cfg = config_mod.load(write_config(tmp_path, pport, dport, extra="""  - id: poirot
+    name: Poirot
+    folder: '%s'
+    python: python
+    args: []
+    port: %d
+  - id: rfq
+    name: RFQ
+    folder: '%s'
+    python: python
+    args: []
+    port: %d
+""" % (tmp_path.as_posix(), free_port(), tmp_path.as_posix(), free_port()), views_extra="""  - id: poirot
+    label: Poirot
+    server: poirot
+  - id: rfq
+    label: RFQ
+    server: rfq
+  - id: sim
+    label: סימולציה
+    server: rfq
+    path: /desk/simulation
+  - id: tracking
+    label: מעקב
+    server: dummy
+""", flow_extra="""  - label: בקשות מחיר
+    view: rfq
+    tag: RFQ
+  - label: הצעות ללקוח
+    view: sim
+    tag: SIM
+  - label: בתפעול
+    view: poirot
+    tag: POIROT
+  - label: מטענים בדרך
+    view: tracking
+    tag: TRACKER
+"""))
+    answers = {"http://rfq/api/summary": RFQ_ANSWER, "http://poirot/api/summary": POIROT_ANSWER}
+    sums = summary_mod.Summaries(three_sources(), http=fake_http(answers), cache_seconds=0)
+    sup = Supervisor(cfg.servers, log_dir=tmp_path / "logs", pid_file=tmp_path / "pids.json")
+    app = create_app(cfg, sup, Recent(tmp_path / "recent.json"), summaries=sums)
+    server = uvicorn.Server(uvicorn.Config(app, host="127.0.0.1", port=pport, log_level="error"))
+    th = threading.Thread(target=server.run, daemon=True)
+    th.start()
+    assert wait_for(lambda: port_open(pport))
+    yield f"http://localhost:{pport}", answers
+    server.should_exit = True
+    th.join(timeout=10)
+    sup.stop_all()
+
+
+def test_the_flow_strip_and_the_needs_card_show_the_systems_numbers(counted_portal):
+    base, answers = counted_portal
+    _, home = get(base + "/")
+    assert 'hx-get="/partials/flow"' in home and 'hx-get="/partials/needs"' in home and "טוען…" in home
+    _, flow = get(base + "/partials/flow")
+    assert 'class="flow-num live"' in flow
+    assert ">2<" in flow and "ממתינות לטיפול שלך" in flow, "RFQs waiting"
+    assert ">3<" in flow and "אצל הלקוח" in flow, "offers with the client"
+    assert ">9<" in flow and "תיקים פתוחים" in flow, "files in operation"
+    assert ">6<" in flow and "הפליגו או המריאו" in flow, "cargo on the way"
+    _, needs = get(base + "/partials/needs")
+    assert 'class="needs-row"' in needs and needs.count('class="needs-row"') == 3, "Poirot, bookings, RFQ; the tracker has 0"
+    assert "דורשים החלטה ב-Poirot" in needs and 'data-open="poirot"' in needs
+    assert "הזמנות חדשות לפתיחה" in needs and "ממתינים בשולחן ה-RFQ" in needs
+
+
+def test_a_system_that_is_down_shows_a_dash_not_an_error(counted_portal):
+    base, answers = counted_portal
+    del answers["http://poirot/api/summary"]
+    status, flow = get(base + "/partials/flow")
+    assert status == 200 and "המערכת כבויה" in flow and "—" in flow
+    assert ">2<" in flow, "the desk still answers"
+    del answers["http://rfq/api/summary"]
+    status, needs = get(base + "/partials/needs")
+    assert status == 200 and "המערכות כבויות" in needs
