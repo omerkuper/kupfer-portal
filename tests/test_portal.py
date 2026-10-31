@@ -214,18 +214,59 @@ def post(url, origin):
         return e.code, e.read().decode("utf-8")
 
 
+HELLOS_HE = ("בוקר טוב, עומר", "צהריים טובים, עומר", "ערב טוב, עומר", "לילה טוב, עומר")
+
+
 def test_home_page_renders_in_hebrew(portal):
     base, _ = portal
     status, body = get(base + "/")
     assert status == 200
-    assert 'dir="rtl"' in body and "מה פותחים עכשיו, עומר?" in body
+    assert 'dir="rtl"' in body and any(f"<h1>{h}</h1>" in body for h in HELLOS_HE)
     assert "מסלול העבודה" in body and "Dummy" in body
+    assert 'src="/static/kupfer-logo.png"' in body, "the logo on the navy bar"
 
 
 def test_english_switch(portal):
     base, _ = portal
     status, body = get(base + "/", headers={"Cookie": "kp_lang=en"})
-    assert 'dir="ltr"' in body and "What are we opening" in body
+    assert 'dir="ltr"' in body and any(f"<h1>{h}, עומר</h1>" in body for h in ("Good morning", "Good afternoon", "Good evening", "Good night"))
+
+
+# ---------------------------------------------------------------------- the Workspace look (31 Oct)
+def test_the_greeting_follows_the_hour_and_the_date_is_written_out():
+    from portal import i18n
+
+    assert [i18n.greeting_key(h) for h in (4, 5, 11, 12, 16, 17, 21, 22, 0)] == [
+        "greet_night", "greet_morning", "greet_morning", "greet_noon", "greet_noon", "greet_evening", "greet_evening",
+        "greet_night", "greet_night"]
+    assert i18n.greeting("he", "עומר", hour=9) == "בוקר טוב, עומר" and i18n.greeting("en", "", hour=19) == "Good evening"
+    sat = time.strptime("2026-10-31", "%Y-%m-%d")
+    assert i18n.today("he", sat) == "שבת, 31 באוקטובר" and i18n.today("en", sat) == "Saturday, 31 October"
+
+
+def test_the_drawer_groups_the_views_systems_first_then_books(tmp_path):
+    cfg = config_mod.load(write_config(tmp_path, free_port(), free_port(), views_extra="""  - id: agents
+    label: סוכנים
+    server: dummy
+    group: books
+"""))
+    assert [(g, [v.id for v in vs]) for g, vs in cfg.groups()] == [("systems", ["dummy", "calculator"]), ("books", ["agents"])]
+    real = config_mod.load(ROOT / "systems.yaml")
+    books = dict(real.groups())["books"]
+    assert [v.id for v in books] == ["agents", "customers", "calculator"]
+    assert all(v.group == "systems" for v in dict(real.groups())["systems"])
+
+
+def test_the_drawer_shows_both_groups(portal):
+    base, _ = portal
+    _, body = get(base + "/")
+    assert 'class="nav-group">המערכות<' in body and 'id="drawer"' in body and "data-drawer-toggle" in body
+
+
+def test_the_step_where_something_waits_is_lit():
+    n = summary_mod.home_numbers({"rfq": RFQ_ANSWER, "poirot": POIROT_ANSWER, "tracker_api": TRACKER_ANSWER})
+    assert n["hot"] == {"rfq": True, "sim": False, "poirot": True, "tracking": False}
+    assert summary_mod.home_numbers({})["hot"] == {"rfq": False, "sim": False, "poirot": False, "tracking": False}
 
 
 def test_a_post_from_another_site_is_refused(portal):
@@ -432,7 +473,7 @@ def test_the_right_key_signs_in_and_the_cookie_opens_the_pages(locked_portal):
     value = cookie.split(";")[0].split("=", 1)[1]
     assert ses.signed_in(value)
     status, _, body = raw(base + "/", headers={"Cookie": f"kupfer_session={value}"})
-    assert status == 200 and "מה פותחים עכשיו" in body and 'action="/logout"' in body
+    assert status == 200 and 'id="drawer"' in body and 'action="/logout"' in body
     status, _, _ = raw(base + "/login", headers={"Cookie": f"kupfer_session={value}"})
     assert status == 303, "already in: the sign-in page sends you on"
 
@@ -596,6 +637,8 @@ def test_the_flow_strip_and_the_needs_card_show_the_systems_numbers(counted_port
     assert 'class="needs-row"' in needs and needs.count('class="needs-row"') == 3, "Poirot, bookings, RFQ; the tracker has 0"
     assert "דורשים החלטה ב-Poirot" in needs and 'data-open="poirot"' in needs
     assert "הזמנות חדשות לפתיחה" in needs and "ממתינים בשולחן ה-RFQ" in needs
+    assert 'id="needs-badge" class="badge" hx-swap-oob="true">8<' in needs and "8 דברים מחכים לך" in needs, "the count beside the greeting"
+    assert 'class="flow-step hot"' in flow, "Poirot and the RFQ desk have something waiting"
 
 
 def test_a_system_that_is_down_shows_a_dash_not_an_error(counted_portal):

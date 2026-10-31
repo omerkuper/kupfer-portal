@@ -12,6 +12,19 @@ T: dict[str, dict[str, str]] = {
         "home": "בית",
         "greet": "מה פותחים עכשיו, {name}?",
         "greet_anon": "מה פותחים עכשיו?",
+        # the Workspace look (31 Oct): the greeting by the hour, the line under it, the drawer's groups
+        "greet_morning": "בוקר טוב",
+        "greet_noon": "צהריים טובים",
+        "greet_evening": "ערב טוב",
+        "greet_night": "לילה טוב",
+        "today_line": "{date} · {n}/{m} מערכות פועלות",
+        "waiting_one": "דבר אחד מחכה לך",
+        "waiting_many": "{n} דברים מחכים לך",
+        "waiting_none": "שום דבר לא מחכה לך",
+        "brand_sub": "פורטל התפעול · רץ על Poirot",
+        "group_systems": "המערכות",
+        "group_books": "ספרים",
+        "menu": "תפריט",
         "search_label": "חיפוש בכל המערכות",
         "search_ph": "חיפוש חכם בכל המערכות — יגיע בשלב 3",
         "flow_title": "מסלול העבודה",
@@ -88,6 +101,18 @@ T: dict[str, dict[str, str]] = {
         "home": "Home",
         "greet": "What are we opening, {name}?",
         "greet_anon": "What are we opening?",
+        "greet_morning": "Good morning",
+        "greet_noon": "Good afternoon",
+        "greet_evening": "Good evening",
+        "greet_night": "Good night",
+        "today_line": "{date} · {n}/{m} systems running",
+        "waiting_one": "one thing waits for you",
+        "waiting_many": "{n} things wait for you",
+        "waiting_none": "nothing waits for you",
+        "brand_sub": "operations portal · runs on Poirot",
+        "group_systems": "Systems",
+        "group_books": "Books",
+        "menu": "Menu",
         "search_label": "Search all systems",
         "search_ph": "Smart search across all systems — coming in phase 3",
         "flow_title": "The work",
@@ -176,6 +201,38 @@ def translator(lang: str):
 
     t.keys = lambda: set(table) | set(T["he"])   # type: ignore[attr-defined] - templates ask "is there a text for this?"
     return t
+
+
+DAYS = {"he": ("שני", "שלישי", "רביעי", "חמישי", "שישי", "שבת", "ראשון"),
+        "en": ("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday")}
+MONTHS = {"he": ("ינואר", "פברואר", "מרץ", "אפריל", "מאי", "יוני", "יולי", "אוגוסט", "ספטמבר", "אוקטובר", "נובמבר", "דצמבר"),
+          "en": ("January", "February", "March", "April", "May", "June", "July", "August", "September", "October",
+                 "November", "December")}
+
+
+def greeting_key(hour: int) -> str:
+    """05-12 morning, 12-17 afternoon, 17-22 evening, else night."""
+    if 5 <= hour < 12:
+        return "greet_morning"
+    if 12 <= hour < 17:
+        return "greet_noon"
+    if 17 <= hour < 22:
+        return "greet_evening"
+    return "greet_night"
+
+
+def greeting(lang: str, name: str = "", hour: Optional[int] = None) -> str:
+    hour = time.localtime().tm_hour if hour is None else hour
+    hello = translator(lang)(greeting_key(hour))
+    return f"{hello}, {name}" if name else hello
+
+
+def today(lang: str, tm: Optional[time.struct_time] = None) -> str:
+    """'שבת, 31 באוקטובר' / 'Saturday, 31 October'."""
+    tm = tm or time.localtime()
+    lang = lang if lang in DAYS else "he"
+    day, month = DAYS[lang][tm.tm_wday], MONTHS[lang][tm.tm_mon - 1]
+    return f"{day}, {tm.tm_mday} ב{month}" if lang == "he" else f"{day}, {tm.tm_mday} {month}"
 
 
 def uptime(since: Optional[float], lang: str) -> str:

@@ -100,6 +100,10 @@ The tests start small stand-in web servers on free ports. Nothing real is starte
    **Shared screens (done, 30 Oct, stage 6):** the desk's approval form picks a customer Poirot knows, Poirot's
    file reads the agent as the desk's book has him today; the portal opens the existing screens (a `customers`
    view, "New customer" in Quick start) - no screen is copied into another system (CONTRACTS.md).
+   **The Workspace look (31 Oct):** Material 3 with the brand's navy - the logo on a navy app bar, a navigation
+   drawer grouped into "systems" and "books" (`group:` in `systems.yaml`; a rail at medium width, a slide-in menu
+   on a phone), tabs with an underline, the flow as a connected stepper with the step that waits for you in copper.
+   Heebo + Roboto. The look lives in `portal/static/portal.css` alone.
 3. **Smart search:** a B/L or AWB goes to tracking, a file number to Poirot, an RFQ number to the desk.
 
 ## After updating a system's code

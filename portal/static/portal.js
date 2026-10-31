@@ -1,4 +1,4 @@
-/* Kupfer portal - the only script: tabs (open, switch, close, remember) and Ctrl K.
+/* Kupfer portal - the only script: tabs (open, switch, close, remember), Ctrl K and the drawer on a narrow screen.
    Everything else is HTMX swapping server-rendered HTML. */
 (function () {
   "use strict";
@@ -81,9 +81,20 @@
     if (wasOn) activate(prev && prev.dataset.tab ? prev.dataset.tab : "home");
   }
 
+  // the navigation drawer on a narrow screen (the Workspace look, 31 Oct): the menu button opens it, a pick or the scrim closes it
+  function drawer(on) {
+    document.body.classList.toggle("drawer-open", on);
+    document.querySelectorAll("[data-drawer-toggle]").forEach(function (b) {
+      if (b.hasAttribute("aria-expanded")) b.setAttribute("aria-expanded", on ? "true" : "false");
+      if (b.classList.contains("drawer-scrim")) b.hidden = !on;
+    });
+  }
+
   document.addEventListener("click", function (e) {
+    var d = e.target.closest("[data-drawer-toggle]");
+    if (d) { drawer(!document.body.classList.contains("drawer-open")); return; }
     var t = e.target.closest("[data-open]");
-    if (t) { e.preventDefault(); open(t.dataset.open, t.dataset.label, t.dataset.path || ""); return; }
+    if (t) { e.preventDefault(); drawer(false); open(t.dataset.open, t.dataset.label, t.dataset.path || ""); return; }
     var s = e.target.closest("[data-tab-select]");
     if (s) { activate(s.dataset.tabSelect); return; }
     var c = e.target.closest("[data-tab-close]");
@@ -96,6 +107,7 @@
   });
 
   document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape" && document.body.classList.contains("drawer-open")) { drawer(false); return; }
     if ((e.ctrlKey || e.metaKey) && (e.key === "k" || e.key === "K")) {
       var box = document.getElementById("search");
       if (box && !box.disabled) { e.preventDefault(); activate("home"); box.focus(); }

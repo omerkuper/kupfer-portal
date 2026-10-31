@@ -41,6 +41,7 @@ class View:
     server: Optional[str] = None
     path: str = "/"
     url: str = ""
+    group: str = "systems"     # where the navigation drawer lists it: "systems" or "books" (agents, customers...)
 
     @property
     def external(self) -> bool:
@@ -71,6 +72,13 @@ class Config:
     views: dict[str, View]
     quick: list[Link] = field(default_factory=list)
     flow: list[Link] = field(default_factory=list)
+
+    def groups(self) -> list[tuple[str, list[View]]]:
+        """The views by drawer group, groups in the order they first appear in systems.yaml."""
+        out: dict[str, list[View]] = {}
+        for v in self.views.values():
+            out.setdefault(v.group, []).append(v)
+        return list(out.items())
 
 
 def safe_path(path: Optional[str]) -> str:
@@ -135,6 +143,7 @@ def load(path: Optional[Path] = None) -> Config:
         views[vid] = View(
             id=vid, label=label, label_en=str(v.get("label_en") or label), icon=str(v.get("icon") or vid),
             server=server, path=safe_path(v.get("path")), url=str(v.get("url") or ""),
+            group=str(v.get("group") or "systems"),
         )
 
     def links(key: str) -> list[Link]:

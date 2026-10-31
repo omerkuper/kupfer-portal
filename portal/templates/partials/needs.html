@@ -12,7 +12,7 @@
       {% for key, num, label, view, path in shown %}
       {% if view in cfg.views %}
       <li><button type="button" class="needs-row" data-open="{{ view }}" data-label="{{ cfg.views[view].text(lang) }}">
-        <span class="needs-num">{{ num }}</span><span class="needs-text">{{ t(label, n=num) }}</span>{{ icon('chevron', 16) }}
+        <span class="needs-num">{{ num }}</span><span class="needs-text">{{ t(label, n=num) }}</span><i class="tag" dir="ltr">{{ cfg.views[view].label_en|upper }}</i>{{ icon('chevron', 16) }}
       </button></li>
       {% endif %}
       {% endfor %}
@@ -22,6 +22,10 @@
     {% endif %}
   {% else %}
     <p class="placeholder">{{ t('needs_off') }}</p>
-    {% if 'poirot' in cfg.views %}<button type="button" class="btn btn-ghost" data-open="poirot" data-label="{{ cfg.views['poirot'].text(lang) }}">{{ t('open_poirot') }}</button>{% endif %}
+    {% if 'poirot' in cfg.views %}<button type="button" class="btn btn-outlined btn-sm" data-open="poirot" data-label="{{ cfg.views['poirot'].text(lang) }}">{{ t('open_poirot') }}</button>{% endif %}
   {% endif %}
 </div>
+{#- the count beside the greeting and on the card's head (out of band: the same answer feeds both) -#}
+{% set total = n.needs_total if n else None %}
+<span id="waiting" hx-swap-oob="true">{% if total is not none %} · {{ t('waiting_one') if total == 1 else t('waiting_many', n=total) if total else t('waiting_none') }}{% endif %}</span>
+<span id="needs-badge" class="badge" hx-swap-oob="true"{% if not total %} hidden{% endif %}>{{ total or '' }}</span>

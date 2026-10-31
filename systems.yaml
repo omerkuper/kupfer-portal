@@ -48,8 +48,9 @@ servers:
     port: 8770
     probe: {path: /health, expect: ['"cargo-tracker"', 'wrong or missing token']}
 
-# The side rail: what each button opens. A view either lives on one of the servers above
+# The navigation drawer: what each item opens. A view either lives on one of the servers above
 # (server + path - it opens as a tab inside the portal) or is an outside address (url - a new window).
+# group: where the drawer lists it - "systems" (the default) or "books" (agents, customers, the calculator).
 views:
   - id: poirot
     label: Poirot
@@ -85,16 +86,19 @@ views:
     icon: agents
     server: rfq
     path: /desk/agents
+    group: books
   - id: customers
     label: לקוחות
     label_en: Customers
     icon: customer
     server: poirot
     path: /customers
+    group: books
   - id: calculator
     label: מחשבון
     label_en: Calculator
     icon: calculator
+    group: books
     url: ""            # your Render address, e.g. https://<your-app>.onrender.com/calculator
 
 # "Quick start" on the home screen: a view, and the page inside it to open.

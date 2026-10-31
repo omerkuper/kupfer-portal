@@ -1,4 +1,4 @@
-{% from "_icons.html" import icon, bird, spectrum %}<!doctype html>
+{% from "_icons.html" import icon %}<!doctype html>
 <html lang="{{ lang }}" dir="{{ dir }}">
 <head>
 <meta charset="utf-8">
@@ -6,12 +6,12 @@
 <title>Kupfer · {{ t('login_title') }}</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@700&family=Assistant:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/static/portal.css?v={{ v }}">
 </head>
 <body class="loginpage">
 <main class="login">
-  <div class="login-brand">{{ bird(44) }}<span class="wordmark">Kupfer</span></div>
+  <div class="login-brand"><img src="/static/kupfer-logo.png" alt="Kupfer" width="192" height="56"><span>{{ t('brand_sub') }}</span></div>
   <form method="post" action="/login" class="card login-card" autocomplete="off">
     <h1>{{ t('login_title') }}</h1>
     <p class="muted">{{ t('login_text') }}</p>
@@ -19,10 +19,9 @@
     <label for="key">{{ t('login_key') }}</label>
     <input id="key" name="key" type="password" class="input" autofocus required autocomplete="current-password">
     {% if error %}<p class="bad" role="alert">{{ t('login_wrong') }}</p>{% endif %}
-    <button type="submit" class="btn btn-primary">{{ icon('lock', 15) }}{{ t('login_btn') }}</button>
+    <button type="submit" class="btn btn-filled">{{ icon('lock', 16) }}{{ t('login_btn') }}</button>
   </form>
-  <a class="btn-lang login-lang" href="/lang?to={{ 'he' if lang == 'en' else 'en' }}" aria-label="{{ t('lang_switch_label') }}">{{ t('lang_switch') }}</a>
-  <footer class="foot">{{ spectrum() }}<span>{{ t('footer') }}</span></footer>
+  <a class="appbar-btn login-lang" href="/lang?to={{ 'he' if lang == 'en' else 'en' }}" aria-label="{{ t('lang_switch_label') }}">{{ t('lang_switch') }}</a>
 </main>
 </body>
 </html>

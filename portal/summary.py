@@ -155,6 +155,9 @@ def home_numbers(answers: Mapping[str, Optional[dict]]) -> dict[str, Any]:
                  "poirot": count(poirot, "files_open"), "tracking": count(poirot, "on_the_way")},
         "needs": needs,
         "needs_total": _sum(*needs.values()),
+        # the step on the flow strip that has something waiting for him is lit (the Workspace look, 31 Oct)
+        "hot": {"rfq": bool(needs["rfq"]), "sim": False, "poirot": bool(needs["poirot"] or needs["bookings"]),
+                "tracking": bool(needs["tracker"])},
         "up": {"rfq": rfq is not None, "poirot": poirot is not None, "tracker_api": tracker is not None},
     }
 

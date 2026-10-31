@@ -72,7 +72,9 @@ def create_app(config: Optional[Config] = None, supervisor: Optional[Supervisor]
     # ------------------------------------------------------------------ pages
     async def home(request: Request) -> Response:
         data = await run_in_threadpool(status_ctx, request)
-        return render(request, "home.html", **data)
+        lang = i18n.pick(request.cookies.get(i18n.COOKIE))
+        return render(request, "home.html", hello=i18n.greeting(lang, cfg.owner), today=i18n.today(lang),
+                      groups=cfg.groups(), **data)
 
     async def set_lang(request: Request) -> Response:
         to = request.query_params.get("to", "he")
